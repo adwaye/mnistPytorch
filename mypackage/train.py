@@ -238,7 +238,7 @@ def train_block(device,model,optimizer,scheduler,data_loader,writer,global_step,
 
             # train_writer.add_scalar('accuracy',training_accuracy,global_step=global_step)
             # train_writer.add_scalar('loss',training_loss,global_step=global_step)
-            add_to_writer(writer,loss_fn,inputs,outputs,labels,iter=global_step,write_logs=True)
+            add_to_writer(writer,loss_fn,inputs,outputs,labels,iter=global_step,write_logs=write_logs)
 
     return global_step
 
@@ -275,7 +275,7 @@ def eval_block(device,model,data_loader,writer,global_step,loss_fn=nn.CrossEntro
         merged_inputs  = torch.cat(input_list,axis=0)
         merged_outputs = torch.cat(output_list,axis=0)
         merged_labels  = torch.cat(label_list,axis=0)
-        add_to_writer(writer,loss_fn,merged_inputs,merged_outputs,merged_labels,iter=global_step,write_logs=True)
+        add_to_writer(writer,loss_fn,merged_inputs,merged_outputs,merged_labels,iter=global_step,write_logs=write_logs)
 
 
 
