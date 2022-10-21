@@ -85,7 +85,7 @@ class simple_model(nn.Module):
 
 
 class mnist_model(nn.Module):
-    def __init__(self,init_width=4,dropout_rate=0.4):
+    def __init__(self,init_width=16,dropout_rate=0.4):
         super(mnist_model,self).__init__()
 
         self.init_width   = init_width
@@ -101,40 +101,44 @@ class mnist_model(nn.Module):
         self.conv1_2 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width,kernel_size=3,stride=2,
                                  padding=1)
         self.conv1_bn = nn.BatchNorm2d(num_features=self.init_width)
-        #num weights= 3*4*4=48, num biases = 4
         #size (14,14,4)
 
-        #self.batch1 = nn.BatchNorm2d(num_features=self.init_width)
-        #input size is halved (14,14)
-        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=3,stride=2,
+
+
+        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=3,stride=1,
                                  padding=1)
-        #num weights= 3*4*8=96 num biases = 8
-        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=3,stride=1,
+
+        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=3,stride=2,
                                  padding=1)
         self.conv2_bn = nn.BatchNorm2d(num_features=self.init_width*2)
-        #num weights= 3*8*8=192 num biases = 8
-        #size (14,14,8)
-        #input size is halved (7,7)
-        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=3,stride=2,
+        #size (7,7,8)
+
+        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=3,stride=1,
                                  padding=1)
-        #num weights= 3*8*16=384 num biases = 16
         self.conv3_2 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width * 4,kernel_size=3,
-                                 stride=1,
+                                 stride=2,
                                  padding=1)
         self.conv3_bn = nn.BatchNorm2d(num_features=self.init_width*4)
-        #size (7,7,16)
-        #input size is halved (4,4)
-        # self.conv4_1 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width*8 ,kernel_size=3,
-        #                          stride=2,
-        #                          padding=1)
-        # self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 4,kernel_size=3,
-        #                          stride=1,
-        #                          padding=1)
         #size (4,4,16)
-        self.fc1  = nn.Linear(in_features=self.init_width * 4 * 4*4,out_features=self.init_width*4*4)
+
+
+        self.conv4_1 = nn.Conv2d(in_channels=self.init_width*4,out_channels=self.init_width*8,kernel_size=3,stride=1,
+                                 padding=1)
+        self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 8,kernel_size=3,
+                                 stride=2,
+                                 padding=1)
+        self.conv4_bn = nn.BatchNorm2d(num_features=self.init_width*8)
+        #size (2,2,16)
+
+
+        self.fc1  = nn.Linear(in_features=self.init_width * 2 * 2*8,out_features=self.init_width*4*4)
         self.fc1_bn = nn.BatchNorm1d(num_features=self.init_width*4*4)
-        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4 )
-        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 )
+        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4*2 )
+        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 *2)
+
+        self.fc3 = nn.Linear(in_features=self.init_width * 4*2 ,out_features=self.init_width * 4)
+        self.fc3_bn = nn.BatchNorm1d(num_features=self.init_width * 4)
+
         self.out  = nn.Linear(in_features=self.init_width * 4,out_features=10)
 
         self.dropout = nn.Dropout(self.dropout_rate)
@@ -152,14 +156,18 @@ class mnist_model(nn.Module):
         z = F.relu(self.conv3_1(z))
         z = F.relu(self.conv3_bn(self.conv3_2(z)))
 
-        # z = F.relu(self.conv4_1(z))
-        # z = F.relu(self.conv4_2(z))
-        #
+
+        z = F.relu(self.conv4_1(z))
+        z = F.relu(self.conv4_bn(self.conv4_2(z)))
+
+
         z = torch.flatten(z,1)
         z = F.relu(self.fc1_bn(self.fc1(z)))
         z = self.dropout(z)
         z = F.relu(self.fc2_bn(self.fc2(z)))
-        #z = self.dropout(z)
+        z = self.dropout(z)
+        z = F.relu(self.fc3_bn(self.fc3(z)))
+        z = self.dropout(z)
         z = self.out(z)
         return z
 
@@ -216,7 +224,7 @@ class mnist_model_pool(nn.Module):
         # self.conv4_1 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width*8 ,kernel_size=3,
         #                          stride=2,
         #                          padding=1)
-        # self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 4,kernel_size=3,
+        # self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_cha=self.init_width * 4,kernel_size=3,
         #                          stride=1,
         #                          padding=1)
         #size (4,4,16)
@@ -438,14 +446,17 @@ def count_nn_params(model):
 
 def _test_model():
     try:
-        from kannadamnistpackage.DataManipulation import MnistDataset
+        from mypackage.DataManipulation import MnistDataset,load_train_csv
     except ModuleNotFoundError:
-        from DataManipulation import MnistDataset
-
-    file_path = "Kannada-MNIST/train.csv"
+        from DataManipulation import MnistDataset,load_train_csv
+    # from torchvision import transforms
+    file_path = load_train_csv()
     #arr      =  load_csv(file_path)
 
     batch_size = 100
+    # transform = transforms.Compose([transforms.ToPILImage(),
+    #                                 transforms.ToTensor()
+    #                                 ])
     data_set = MnistDataset(file_path,im_size=(28,28))
     train_loader = DataLoader(data_set,batch_size=100,shuffle=True)
     device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
@@ -461,7 +472,7 @@ def _test_model():
 
         else:
             break
-    my_cnn = mnist_model(init_width=4,dropout_rate=0.4).to(device)
+    my_cnn = mnist_model(init_width=16,dropout_rate=0.4).to(device)
     for i,data in enumerate(train_loader,0):
         if i == 0:
             inputs,labels = data[0].to(device,dtype=torch.float),data[1].to(device)

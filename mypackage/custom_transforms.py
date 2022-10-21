@@ -150,7 +150,7 @@ def create_train_test_transform(log_dir,write_params=True,kwargs={}):
 
 def test():
     try:
-        from kannadamnistpackage.DataManipulation import MnistDataset,DataLoader
+        from mypackage.DataManipulation import MnistDataset,DataLoader
     except ModuleNotFoundError:
         from DataManipulation import MnistDataset,DataLoader
 

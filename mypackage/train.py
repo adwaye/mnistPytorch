@@ -12,10 +12,10 @@ from sklearn.metrics import confusion_matrix
 import seaborn as sns
 
 try:
-    from kannadamnistpackage.util import make_train_test_log_dir, make_log_dir
-    from kannadamnistpackage.custom_transforms import create_train_test_transform
-    from kannadamnistpackage.Architectures import simple_model,count_nn_params,nn
-    from kannadamnistpackage.DataManipulation import *
+    from mypackage.util import make_train_test_log_dir, make_log_dir
+    from mypackage.custom_transforms import create_train_test_transform
+    from mypackage.Architectures import simple_model,count_nn_params,nn
+    from mypackage.DataManipulation import *
 except ModuleNotFoundError:
     from util import make_train_test_log_dir, make_log_dir
     from custom_transforms import create_train_test_transform
@@ -39,7 +39,7 @@ class Trainer(object):
     "Data/train.csv",val_file = "Data/Dig-MNIST.csv",log_dir='./logs',create_save_loc=True,write_logs=True,kwargs={}):
         """
 
-        :param model: model of class nn.Module, please use classes present in kannadamnistpackage.Architectures as
+        :param model: model of class nn.Module, please use classes present in mypackage.Architectures as
                       the model
         :param optimizer: choice of 'adam' or 'momentum'
         :param device: 'cuda' or 'cpu': device on which to run training and inference

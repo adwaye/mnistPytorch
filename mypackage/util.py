@@ -72,7 +72,7 @@ def update_dir(nameInit,create_dirs=True):
 
 if __name__=='__main__':
     try:
-        from kannadamnistpackage.Architectures import simple_model
+        from mypackage.Architectures import simple_model
     except ModuleNotFoundError:
         from Architectures import simple_model
     model = simple_model()

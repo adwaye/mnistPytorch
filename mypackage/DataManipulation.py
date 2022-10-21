@@ -4,7 +4,7 @@ import numpy as np
 import pkg_resources
 import pandas as pd
 import matplotlib.pyplot as plt
-from torchvision import transforms
+from torchvision import transforms as trns
 # from pkgutil import get_data
 # import os, sys
 #from Augmentor.Operations import Distort
@@ -43,7 +43,12 @@ class MnistDataset(Dataset):
             self.dataframe = csvfile
 
         self.im_size    = im_size
-        self.transforms = transforms
+        if transforms is None:
+            self.transforms = trns.Compose([trns.ToPILImage(),
+                                    trns.ToTensor()
+                                    ])
+        else:
+            self.transforms = transforms
 
 
 
@@ -117,12 +122,12 @@ def plot_digits():
     # p.rotate(probability=0.7,max_left_rotation=10,max_right_rotation=10)
     # p.zoom(probability=0.5,min_factor=1.1,max_factor=1.3)
     # p.random_distortion(grid_width=5,grid_height=5,magnitude=2,probability=0.5)
-    trans = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.ToTensor()
-    ])
+    # trans = tr.Compose([
+    #     transforms.ToPILImage(),
+    #     transforms.ToTensor()
+    # ])
 
-    data_gen = MnistDataset(df,im_size=(28,28),transforms=trans)
+    data_gen = MnistDataset(df,im_size=(28,28))
 
 
     fix,ax = plt.subplots(3,3)
@@ -144,20 +149,12 @@ def plot_digits():
 
 def test_data():
     csvfile   = load_test_csv()
-    out_shape = (28,28,1)
-    data_gen  = MnistDataset(csvfile,im_size=out_shape[:-1])
+    out_shape = (1,28,28)
+    data_gen  = MnistDataset(csvfile,im_size=out_shape[1:])
     im,lab    = data_gen.__getitem__(i=0)
     assert im.shape == out_shape
     assert type(lab)==np.int64
 
-    trans = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.ToTensor()
-    ])
-    data_gen = MnistDataset(csvfile,im_size=out_shape[:-1],transforms=trans)
-    im,lab    = data_gen.__getitem__(i=0)
-    assert im.shape == (1,28,28)
-    assert type(lab)==np.int64
 
 
 
