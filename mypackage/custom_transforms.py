@@ -9,6 +9,14 @@ from Augmentor.Operations import Distort
 
 class RandomDistortion:
     def __init__(self,probability, grid_width, grid_height, magnitude):
+        """
+        Applies elastic distortion with prob probability see https://augmentor.readthedocs.io/en/stable/ for info on
+        grdi and magnitiude params
+        :param probability:
+        :param grid_width:
+        :param grid_height:
+        :param magnitude:
+        """
         self.probability = probability
         self.grid_width  = grid_width
         self.grid_height = grid_height
@@ -32,9 +40,12 @@ class RandomDistortion:
                                                                    self.magnitude)
 
 class SaltPepperNoise:
-    """Rotate by one of the given angles."""
-
     def __init__(self, mean=0,std=1):
+        """
+        Applies Gaussian noise to an image
+        :param mean:
+        :param std:
+        """
         self.mean = mean
         self.std  = std
 
@@ -46,6 +57,9 @@ class SaltPepperNoise:
         return self.__class__.__name__+'(mean={:},std={:})'.format(self.mean,self.std)
 
 class MapToInterval:
+    """
+    transforms image intensity to [0,1] interval
+    """
     def __init__(self):
         self.min=0
         self.max=1
@@ -72,6 +86,32 @@ class MapToInterval:
 
 
 def create_train_test_transform(log_dir,write_params=True,kwargs={}):
+    """
+    Creates transforms for training set and validation set. Validation trans has no augmentation, just toPIL and
+    ToTensor
+    :param log_dir: string path to where log files need to be saved logfile contain info on params used for each
+                    transformation
+    :param write_params: whether to save logs about parameters
+    :param kwargs: optional kwargs conataining params for each transform. see body
+                    probability       = kwargs.get("probability",1)
+                    max_rotation_left = kwargs.get("max_rotation_left",10.0)
+                    max_rotation_right = kwargs.get("max_rotation_right",10.0)
+
+                    max_factor = kwargs.get("max_factor",1.1)
+                    min_factor = kwargs.get("min_factor",1.05)
+
+                    grid_height = kwargs.get("grid_height",15)
+                    grid_width = kwargs.get("grid_width",15)
+                    magnitude  = kwargs.get("magnitude",1)
+                    brightness = kwargs.get("brightness",2)
+                    contrast = kwargs.get("contrast",2)
+                    translate = kwargs.get("translate",0.1)
+                    blur_max = kwargs.get("blur_max",2)
+                    blur_min = kwargs.get("blur_min",0.1)
+                    blur_kernel = kwargs.get("blur_kernel",5)
+                    noise_sd    = kwargs.get("noise_sd",1/784)
+    :return: tuple tran_trans, test_trans
+    """
 
     probability       = kwargs.get("probability",1)
     max_rotation_left = kwargs.get("max_rotation_left",10.0)

@@ -43,13 +43,57 @@ class Trainer(object):
                       the model
         :param optimizer: choice of 'adam' or 'momentum'
         :param device: 'cuda' or 'cpu': device on which to run training and inference
-        :param transform: class
-        :param train_file:
-        :param val_file:
-        :param log_dir:
-        :param create_save_loc:
-        :param write_logs:
-        :param kwargs:
+        :param transform: list of transform needs to be output of torchvision.transforms.Compose and needs to have
+                        the form
+                                                   transforms = trns.Compose([trns.ToPILImage(),
+                                                      transform1,
+                                                      transform2,
+                                                      .
+                                                      .
+                                                      .,
+                                                      transformN,
+                                                      trns.ToTensor()
+                                    ])
+
+                           )
+        :param train_file: pd.dataframe (result of load_csv) or path to csb containing training data, needs to be same
+                            format as mnist
+        dataset
+        :param val_file: redundant
+        :param log_dir:  string where to save the tensorboard output and the model, and params info
+        :param create_save_loc: bool whther to create new directory withing log_dir or to save withing log_dir when
+                            saving
+        :param write_logs: bool whether to save logs
+        :param kwargs: dict, extra arguments to be passed. for a list of arguments
+        example:
+        opt_kwargs = dict(batch_size=batch_size,#data batch size
+                  l_rate=l_rate, #initial learning rate
+                  lr_gamma=lr_gamma, #decay rate for lr scheduler
+                  momentum=momentum, #momentum for sgd, if sgd is selected
+                  weight_decay=weight_decay, #weight decay parameter for optimizer
+                  dampening=dampening, #dampening for adam and sgd
+                  nesterov=nesterov, #whether to use nesterov in sgd
+                  probability=trans_probability, #probability of applying data augmentation to
+                  max_rotation_right=max_rotation_right, #max rotation for affine transform in data aug
+                  max_rotation_left=max_rotation_left, #min rotation for affine transform in data aug
+                  max_factor=max_factor, #max scale for affine transform in data aug
+                  min_factor=min_factor, #min scale for affine transform in data aug
+                  grid_height=grid_height, #grid height for elastic transform
+                  grid_width=grid_width, #grid width for elastic transform
+                  magnitude=magnitude, #magnitude of elastic transform
+                  init_width=init_width, #number of stacks in first conv layer of nn
+                  brightness=brightness, #brightness of color jitter transform
+                  contrast = contrast, #contrast in color jitter transform see https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html
+                  translate=translate, #fraction by which to translate in affine transform see
+                  https://pytorch.org/vision/main/generated/torchvision.transforms.RandomAffine.html
+                  blur_kernel = blur_kernel,  #paramters of gaussian blur see :
+                  https://pytorch.org/vision/main/generated/torchvision.transforms.GaussianBlur.html
+                  blur_min = blur_min,
+                  blur_max = blur_max,
+                  noise_sd = noise_sd #sd of gaussian noise transform see custom_transform.SaltPepperNoise
+                  )
+
+
         """
         self.write_logs = write_logs
         self.model = model
@@ -446,7 +490,8 @@ def _test_trainer():
                       grid_width=grid_width,
                       magnitude=magnitude,
                       brightness=brightness,
-                      contrast=3
+                      contrast=contrast,
+
 
                       )
 
@@ -550,80 +595,4 @@ def test_confusion_matrix():
 
 
 if __name__=='__main__':
-
-
     _test_trainer()
-    # model      = simple_model()
-    # transforms
-
-    #trainer._create_log_files()
-    # net = simple_model()
-    # trainer = Trainer(model=net)
-    # testloader = trainer.test_loader
-    # y_pred = []
-    # y_true = []
-    #
-    # # iterate over test data
-    # for inputs,labels in testloader:
-    #     inputs,labels = inputs.to('cuda',dtype=torch.float),labels.to('cuda')
-    #
-    #
-    #     output = net(inputs)  # Feed Network
-    #
-    #     output = (torch.max(torch.exp(output),1)[1]).data.cpu().numpy()
-    #     y_pred.extend(output)  # Save Prediction
-    #
-    #     labels = labels.data.cpu().numpy()
-    #     y_true.extend(labels)  # Save Truth
-    #
-    # # constant for classes
-    # classes = ('T-shirt/top','Trouser','Pullover','Dress','Coat',
-    #            'Sandal','Shirt','Sneaker','Bag','Ankle Boot')
-    #
-    # # Build confusion matrix
-    # cf_matrix = confusion_matrix(y_true,y_pred)
-    # df_cm = pd.DataFrame(cf_matrix / np.sum(cf_matrix) * 10,index=[i for i in classes],
-    #                      columns=[i for i in classes])
-    # plt.figure(figsize=(12,7))
-    # sns.heatmap(df_cm,annot=True)
-    # plt.savefig('output.png')
-
-    #trans= create_transform(write_params=True,log_dir='./')
-    # device = torch.device("cuda:0" if torch.cuda.is_available() else 'cpu')
-    # my_cnn = simple_model().to(device)
-    # num_params = count_nn_params(my_cnn)
-    # print(my_cnn)
-    # print(" Device used is :" + str(device))
-    # print("Num params ={}".format)
-    #
-    # loss_fn   = nn.CrossEntropyLoss()
-    #
-    # optimizer = optim.Adam(my_cnn.parameters(),lr=l_rate)
-    # scheduler = optim.lr_scheduler.ExponentialLR(optimizer,gamma=lr_gamma)
-    #
-    # transform = transforms.Compose([transforms.ToTensor()])
-    # train_dataset = MnistDataset(train_file,im_size=(28,28),transforms=transform)
-    # test_dataset  = MnistDataset(test_file,im_size=(28,28),transforms=transform)
-    # train_loader  = DataLoader(train_dataset,batch_size=batch_size,shuffle=True)
-    # test_loader  = DataLoader(test_dataset,batch_size=batch_size,shuffle=True)
-    # train_log_dir,test_log_dir,model_outdir = make_train_test_log_dir(model=my_cnn)
-    # train_writer = SummaryWriter(log_dir=train_log_dir)
-    # test_writer = SummaryWriter(log_dir=test_log_dir)
-    # global_step = 0
-    # for epoch in range(epochs):
-    #
-    #     #global_step += 1
-    #     #my_cnn.train()
-    #     global_step = train_block(device,my_cnn,optimizer,scheduler,train_loader,train_writer,global_step)
-    #     eval_block(device,my_cnn,test_loader,test_writer,global_step)
-    #     save_checkpt(model=my_cnn,optimizer=optimizer,scheduler=scheduler,epoch=epoch,out_dir=model_outdir)
-    # #todo: save model after every epoch along with optimizer state.
-    # print('Finished Training')
-
-
-
-
-
-
-
-

@@ -34,6 +34,18 @@ class MnistDataset(Dataset):
         :param im_size: tuple (width, height) of the image contained in col[1:]
         :param transforms: transformations to be applied to the image before being fed into the nn,
                            last transformation needs to be torchvision.transforms.ToTensor() to work with architectures
+                           example, valid tranform looks like this
+                           transforms = trns.Compose([trns.ToPILImage(),
+                                                      transform1,
+                                                      transform2,
+                                                      .
+                                                      .
+                                                      .,
+                                                      transformN,
+                                                      trns.ToTensor()
+                                    ])
+
+                           )
         """
         super(MnistDataset,self).__init__()
         if type(csvfile) is str:
@@ -72,7 +84,7 @@ class MnistDataset(Dataset):
 def load_train_csv():
     """
     loads the train_csv file from kannadaMnist
-    :return:
+    :return: pd.dataframe
     """
 
     # data = get_data('<kannadamnistpackage','Data/train.csv')
@@ -89,7 +101,7 @@ def load_train_csv():
 def load_test_csv():
     """
     loads the test_csv file from kannadaMnist to be used for submission
-    :return:
+    :return: pd.dataframe
     """
     stream = pkg_resources.resource_filename(__name__,'Data/test.csv')
     return pd.read_csv(stream,encoding='latin-1')
@@ -97,7 +109,7 @@ def load_test_csv():
 def load_dig_csv():
     """
     loads the dig-mnist file to eb used for further validation
-    :return:
+    :return: pd.datarframe
     """
     stream = pkg_resources.resource_filename(__name__,'Data/Dig-MNIST.csv')
     return pd.read_csv(stream,encoding='latin-1')
@@ -105,7 +117,7 @@ def load_dig_csv():
 def load_sample_submission():
     """
     loads the sample submission file to be filled in at inference time
-    :return:
+    :return: pd.dataframe
     """
     stream = pkg_resources.resource_filename(__name__,'Data/sample_submission.csv')
     return pd.read_csv(stream,encoding='latin-1')
