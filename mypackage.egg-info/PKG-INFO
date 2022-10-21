@@ -1,0 +1,29 @@
+Metadata-Version: 2.1
+Name: mypackage
+Version: 0.0.1
+Summary: Set of classes for kannada mnist challenge
+Home-page: https://github.com/adwaye
+Author: Adwaye Rambojun
+License: GPLv3
+Keywords: kannadaMnist
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Science/Research
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 2.7
+Classifier: Programming Language :: Python :: 3
+License-File: LICENSE
+
+=============================
+kannadamnistpackage in pytorch
+=============================
+
+ Trainer Class::
+
+     from kannadamnistpackage.train import Trainer
+     from kannadamnistpackage.Architectures import simple_model
+
+
+
