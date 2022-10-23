@@ -2,6 +2,17 @@ import os
 
 
 def make_train_test_log_dir(model,log_loc='./logs',create_dirs=True):
+    """Creates a train, test output directory where model parameters are saved
+    :param model:  model whose logs need to be saved, directory will have name model.__get_name()
+    :type model: pytorch.nn.module
+    :param log_loc: path pointing where new directory should be created
+    :type log_loc: string
+    :param create_dirs: if true, log dirs are created
+    :type create_dirs: bool
+    :return: tuple containing train_loc,test_loc,oudir, train_loc = outdir/train ttest_loc=outdir/test outdir: path
+             pointing to log_loc/model.__get_name()
+    :rtype: tuple()
+    """
     out_dir   = make_log_dir(model,log_loc,create_dirs=create_dirs)
     train_loc = os.path.join(out_dir,'train')
     val_loc   = os.path.join(out_dir,'test')
@@ -40,10 +51,10 @@ def update_dir(nameInit,create_dirs=True):
     nameInit/[x+i]
     :param nameInit: path within which the numbered folder needs to be located
     :return: path of the newly created folder
-    example
-    nameInit = ./
-    ls ./ returns folder1 1 2 3
-    x = update_dir('./)
+    example \n
+    nameInit = ./ \n
+    ls ./ returns folder1 1 2 3 \n
+    x = update_dir('./) \n
     print(x)
     ./4
     """

@@ -24,15 +24,6 @@ except ModuleNotFoundError:
 
 
 
-# l_rate     = 0.01
-# lr_gamma   = 1
-# batch_size = 100
-# epochs     = 2
-#
-# train_file = "Kannada-MNIST/train.csv"
-# test_file = "Kannada-MNIST/Dig-MNIST.csv"
-
-
 
 class Trainer(object):
     def __init__(self,model,optimizer='Adam',device='cuda',transform=False,train_file =
@@ -66,31 +57,32 @@ class Trainer(object):
         :param write_logs: bool whether to save logs
         :param kwargs: dict, extra arguments to be passed. for a list of arguments
         example:
-        opt_kwargs = dict(batch_size=batch_size,#data batch size
-                  l_rate=l_rate, #initial learning rate
-                  lr_gamma=lr_gamma, #decay rate for lr scheduler
-                  momentum=momentum, #momentum for sgd, if sgd is selected
-                  weight_decay=weight_decay, #weight decay parameter for optimizer
-                  dampening=dampening, #dampening for adam and sgd
-                  nesterov=nesterov, #whether to use nesterov in sgd
-                  probability=trans_probability, #probability of applying data augmentation to
-                  max_rotation_right=max_rotation_right, #max rotation for affine transform in data aug
-                  max_rotation_left=max_rotation_left, #min rotation for affine transform in data aug
-                  max_factor=max_factor, #max scale for affine transform in data aug
-                  min_factor=min_factor, #min scale for affine transform in data aug
-                  grid_height=grid_height, #grid height for elastic transform
-                  grid_width=grid_width, #grid width for elastic transform
-                  magnitude=magnitude, #magnitude of elastic transform
-                  init_width=init_width, #number of stacks in first conv layer of nn
-                  brightness=brightness, #brightness of color jitter transform
-                  contrast = contrast, #contrast in color jitter transform see https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html
+        opt_kwargs = dict(batch_size=batch_size,#data batch size \n
+                  l_rate=l_rate, #initial learning rate \n
+                  lr_gamma=lr_gamma, #decay rate for lr scheduler \n
+                  momentum=momentum, #momentum for sgd, if sgd is selected \n
+                  weight_decay=weight_decay, #weight decay parameter for optimizer \n
+                  dampening=dampening, #dampening for adam and sgd \n
+                  nesterov=nesterov, #whether to use nesterov in sgd \n
+                  probability=trans_probability, #probability of applying data augmentation to \n
+                  max_rotation_right=max_rotation_right, #max rotation for affine transform in data aug \n
+                  max_rotation_left=max_rotation_left, #min rotation for affine transform in data aug \n
+                  max_factor=max_factor, #max scale for affine transform in data aug \n
+                  min_factor=min_factor, #min scale for affine transform in data aug \n
+                  grid_height=grid_height, #grid height for elastic transform \n
+                  grid_width=grid_width, #grid width for elastic transform \n
+                  magnitude=magnitude, #magnitude of elastic transform \n
+                  init_width=init_width, #number of stacks in first conv layer of nn \n
+                  brightness=brightness, #brightness of color jitter transform \n
+                  contrast = contrast, #contrast in color jitter transform see
+                  https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html \n
                   translate=translate, #fraction by which to translate in affine transform see
-                  https://pytorch.org/vision/main/generated/torchvision.transforms.RandomAffine.html
+                  https://pytorch.org/vision/main/generated/torchvision.transforms.RandomAffine.html \n
                   blur_kernel = blur_kernel,  #paramters of gaussian blur see :
-                  https://pytorch.org/vision/main/generated/torchvision.transforms.GaussianBlur.html
-                  blur_min = blur_min,
-                  blur_max = blur_max,
-                  noise_sd = noise_sd #sd of gaussian noise transform see custom_transform.SaltPepperNoise
+                  https://pytorch.org/vision/main/generated/torchvision.transforms.GaussianBlur.html \n
+                  blur_min = blur_min, \n
+                  blur_max = blur_max, \n
+                  noise_sd = noise_sd #sd of gaussian noise transform see custom_transform.SaltPepperNoise \n
                   )
 
 
@@ -289,6 +281,25 @@ def train_block(device,model,optimizer,scheduler,data_loader,writer,global_step,
 
 
 def eval_block(device,model,data_loader,writer,global_step,loss_fn=nn.CrossEntropyLoss(),write_logs=True):
+    """
+
+    :param device:
+    :type device:
+    :param model:
+    :type model:
+    :param data_loader:
+    :type data_loader:
+    :param writer:
+    :type writer:
+    :param global_step:
+    :type global_step:
+    :param loss_fn:
+    :type loss_fn:
+    :param write_logs:
+    :type write_logs:
+    :return:
+    :rtype:
+    """
     #training_loss     = 0.0
     #training_accuracy = 0.0
     #running_loss = 0.0
@@ -343,6 +354,19 @@ def make_prediction_fig(inputs,pred_class,labels,iter):
 
 
 def make_confusion_matrix(inputs,pred_class,labels,iter):
+    """
+
+    :param inputs:
+    :type inputs:
+    :param pred_class:
+    :type pred_class:
+    :param labels:
+    :type labels:
+    :param iter:
+    :type iter:
+    :return:
+    :rtype:
+    """
     #TODO: THIS IS NOT DOING WHAT i WANT IT TO DO
     print("input to confusion matrix")
     print(labels.shape)
@@ -358,17 +382,28 @@ def make_confusion_matrix(inputs,pred_class,labels,iter):
     return fig
 
 def add_to_writer(writer,loss_fn,inputs,outputs,labels,iter,write_logs):
-    """
-    Function that adds performance metrics ro a tensorboard summary writer at training glbal step=iter
+    """Function that adds performance metrics ro a tensorboard summary writer at training glbal step=iter
     also prints the accuracy and loss metrics
+
+
     :param writer:
+    :type writer:
     :param loss_fn:
+    :type loss_fn:
     :param inputs:
+    :type inputs:
     :param outputs:
+    :type outputs:
     :param labels:
+    :type labels:
     :param iter:
+    :type iter:
+    :param write_logs:
+    :type write_logs:
     :return:
+    :rtype:
     """
+
     pred_score,pred_class = outputs.max(dim=1)
     accuracy = (pred_class == labels).sum().item()
     accuracy /= inputs.shape[0]
@@ -386,6 +421,25 @@ def add_to_writer(writer,loss_fn,inputs,outputs,labels,iter,write_logs):
 
 
 def save_checkpt(model,optimizer,scheduler,epoch,out_dir,max_keep=10,delete_prev=True):
+    """
+
+    :param model:
+    :type model:
+    :param optimizer:
+    :type optimizer:
+    :param scheduler:
+    :type scheduler:
+    :param epoch:
+    :type epoch:
+    :param out_dir:
+    :type out_dir:
+    :param max_keep:
+    :type max_keep:
+    :param delete_prev:
+    :type delete_prev:
+    :return:
+    :rtype:
+    """
     checkpoints = [f for f in os.listdir(out_dir) if 'checkpoint' in f]
     if len(checkpoints)>max_keep:
         for f in checkpoints:
@@ -401,6 +455,21 @@ def save_checkpt(model,optimizer,scheduler,epoch,out_dir,max_keep=10,delete_prev
 
 
 def load_checkpt(model,optimizer,scheduler,epoch,out_dir):
+    """
+
+    :param model:
+    :type model:
+    :param optimizer:
+    :type optimizer:
+    :param scheduler:
+    :type scheduler:
+    :param epoch:
+    :type epoch:
+    :param out_dir:
+    :type out_dir:
+    :return:
+    :rtype:
+    """
     file_path = os.path.join(out_dir,'checkpoint_epoch_{:}.pt'.format(epoch))
     print('loading '+file_path)
     checkpoint = torch.load(file_path)
@@ -409,46 +478,12 @@ def load_checkpt(model,optimizer,scheduler,epoch,out_dir):
     scheduler.load_state_dict(checkpoint['scheduler'])
     return model,optimizer,scheduler
 
-# def create_transform(log_dir,write_params=True,kwargs={}):
-#     p = Augmentor.Pipeline()
-#     probability       = kwargs.get("probability",0.3)
-#     max_rotation_left = kwargs.get("max_rotation_left",10.0)
-#     max_rotation_right = kwargs.get("max_rotation_right",10.0)
-#     p.rotate(probability=probability,max_left_rotation=max_rotation_left,max_right_rotation=max_rotation_right)
-#     max_factor = kwargs.get("max_factor",1.1)
-#     min_factor = kwargs.get("min_factor",1.05)
-#     p.zoom(probability=probability,min_factor=min_factor,max_factor=max_factor)
-#     grid_height = kwargs.get("grid_height",5)
-#     grid_width = kwargs.get("grid_width",5)
-#     magnitude  = kwargs.get("magnitude",2)
-#     p.random_distortion(grid_width=grid_width,grid_height=grid_height,magnitude=magnitude,probability=probability)
-#     trans = transforms.Compose([
-#         p.torch_transform(),
-#         transforms.ToTensor()
-#     ])
-#     if write_params:
-#         out_dict = dict(probability=probability,
-#                         max_rotation_right=max_rotation_right,
-#                         max_rotation_left=max_rotation_left,
-#                         max_factor = max_factor,
-#                         min_factor = min_factor,
-#                         grid_height = grid_height,
-#                         grid_width = grid_width,
-#                         magnitude = magnitude
-#                         )
-#         with open(os.path.join(log_dir,"transform_params.txt"),'w') as f:
-#             for op in p.operations:
-#                 f.write(str(op.__class__)+ '\n')
-#             for key,val in out_dict.items():
-#                 f.write('%s:%s\n' % (key, val))
-#
-#
-#
-#     return trans
+
 
 
 
 def _test_trainer():
+
 
     model = simple_model()
 

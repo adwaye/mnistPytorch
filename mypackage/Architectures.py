@@ -14,7 +14,20 @@ import torch.nn.functional as F
 import matplotlib.pyplot as plt
 
 class simple_model(nn.Module):
+    """
+        :param init_width:initial width of filters for first conv layer
+        :type init_width :int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+    """
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+
+        :param init_width:initial width of filters for first conv layer
+        :type init_width :int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(simple_model,self).__init__()
 
         self.init_width   = init_width
