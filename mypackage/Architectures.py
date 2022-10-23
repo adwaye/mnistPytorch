@@ -267,6 +267,492 @@ class mnist_model_pool(nn.Module):
         return z
 
 
+
+class mnist_model_pool3fc(nn.Module):
+    def __init__(self,init_width=4,dropout_rate=0.4):
+        super(mnist_model_pool3fc,self).__init__()
+
+        self.init_width   = init_width
+        self.dropout_rate = dropout_rate
+
+        self.init_layers()
+
+
+    def init_layers(self):
+        #input size (28,28)
+        self.conv1_1 = nn.Conv2d(in_channels=1,out_channels=self.init_width,kernel_size=3,stride=1,padding=1)
+        #num weights= 3*4*1=12
+        self.conv1_2 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width,kernel_size=3,stride=1,
+                                 padding=1)
+        self.conv1_bn = nn.BatchNorm2d(num_features=self.init_width)
+        #num weights= 3*4*4=48, num biases = 4
+        #size (14,14,4)
+
+        #self.batch1 = nn.BatchNorm2d(num_features=self.init_width)
+        #input size is halved (14,14)
+        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=3,stride=1,
+                                 padding=1)
+        #num weights= 3*4*8=96 num biases = 8
+        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=3,stride=1,
+                                 padding=1)
+        self.conv2_bn = nn.BatchNorm2d(num_features=self.init_width*2)
+        #num weights= 3*8*8=192 num biases = 8
+        #size (14,14,8)
+        #input size is halved (7,7)
+        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=3,stride=1,
+                                 padding=1)
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv3_2 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width * 4,kernel_size=3,
+                                 stride=1,
+                                 padding=1)
+        self.conv3_bn = nn.BatchNorm2d(num_features=self.init_width*4)
+
+
+        self.conv4_1 = nn.Conv2d(in_channels=self.init_width*4,out_channels=self.init_width*8,kernel_size=3,stride=1,
+                                 padding=1)
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 8,kernel_size=3,
+                                 stride=1,
+                                 padding=1)
+        self.conv4_bn = nn.BatchNorm2d(num_features=self.init_width*8)
+        #size (7,7,16)
+        #input size is halved (4,4)
+        # self.conv4_1 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width*8 ,kernel_size=3,
+        #                          stride=2,
+        #                          padding=1)
+        # self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_cha=self.init_width * 4,kernel_size=3,
+        #                          stride=1,
+        #                          padding=1)
+        #size (4,4,16)
+
+
+        self.fc1  = nn.Linear(in_features=self.init_width * 4 * 4*8,out_features=self.init_width*4*4)
+        self.fc1_bn = nn.BatchNorm1d(num_features=self.init_width*4*4)
+        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4*2 )
+        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 *2)
+
+        self.fc3 = nn.Linear(in_features=self.init_width * 4*2 ,out_features=self.init_width * 4)
+        self.fc3_bn = nn.BatchNorm1d(num_features=self.init_width * 4)
+
+
+        self.out  = nn.Linear(in_features=self.init_width * 4,out_features=10)
+
+        self.dropout = nn.Dropout(self.dropout_rate)
+        #self.fc5  = nn.Linear(in_features=)
+        #size (7,7,1)
+
+    def forward(self,z):
+        z = F.relu(self.conv1_1(z))
+        z = F.relu(self.conv1_bn(self.conv1_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv2_1(z))
+        z = F.relu(self.conv2_bn(self.conv2_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv3_1(z))
+        z = F.relu(self.conv3_bn(self.conv3_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2,padding=1)
+        z = F.relu(self.conv4_1(z))
+        z = F.relu(self.conv4_bn(self.conv4_2(z)))
+        #
+
+        # z = F.relu(self.conv4_1(z))
+        # z = F.relu(self.conv4_2(z))
+        #
+        z = torch.flatten(z,1)
+        z = F.relu(self.fc1_bn(self.fc1(z)))
+        z = self.dropout(z)
+        z = F.relu(self.fc2_bn(self.fc2(z)))
+        z = F.relu(self.fc3_bn(self.fc3(z)))
+        #z = self.dropout(z)
+        z = self.out(z)
+        return z
+
+class mnist_model_pool_leaky(nn.Module):
+    def __init__(self,init_width=4,dropout_rate=0.4,negative_slope=0.1):
+        super(mnist_model_pool_leaky,self).__init__()
+
+        self.init_width   = init_width
+        self.dropout_rate = dropout_rate
+        self.negative_slope = negative_slope
+
+        self.init_layers()
+
+
+    def init_layers(self):
+        #input size (28,28)
+        self.conv1_1 = nn.Conv2d(in_channels=1,out_channels=self.init_width,kernel_size=3,stride=1,padding=1)
+        #num weights= 3*4*1=12
+        self.conv1_2 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width,kernel_size=3,stride=1,
+                                 padding=1)
+        self.conv1_bn = nn.BatchNorm2d(num_features=self.init_width)
+        #num weights= 3*4*4=48, num biases = 4
+        #size (14,14,4)
+
+        #self.batch1 = nn.BatchNorm2d(num_features=self.init_width)
+        #input size is halved (14,14)
+        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=3,stride=1,
+                                 padding=1)
+        #num weights= 3*4*8=96 num biases = 8
+        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=3,stride=1,
+                                 padding=1)
+        self.conv2_bn = nn.BatchNorm2d(num_features=self.init_width*2)
+        #num weights= 3*8*8=192 num biases = 8
+        #size (14,14,8)
+        #input size is halved (7,7)
+        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=3,stride=1,
+                                 padding=1)
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv3_2 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width * 4,kernel_size=3,
+                                 stride=1,
+                                 padding=1)
+        self.conv3_bn = nn.BatchNorm2d(num_features=self.init_width*4)
+
+
+        self.conv4_1 = nn.Conv2d(in_channels=self.init_width*4,out_channels=self.init_width*8,kernel_size=3,stride=1,
+                                 padding=1)
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 8,kernel_size=3,
+                                 stride=1,
+                                 padding=1)
+        self.conv4_bn = nn.BatchNorm2d(num_features=self.init_width*8)
+        #size (7,7,16)
+        #input size is halved (4,4)
+        # self.conv4_1 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width*8 ,kernel_size=3,
+        #                          stride=2,
+        #                          padding=1)
+        # self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_cha=self.init_width * 4,kernel_size=3,
+        #                          stride=1,
+        #                          padding=1)
+        #size (4,4,16)
+        self.fc1  = nn.Linear(in_features=self.init_width * 4 * 4*8,out_features=self.init_width*4*4)
+        self.fc1_bn = nn.BatchNorm1d(num_features=self.init_width*4*4)
+        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4 )
+        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 )
+        self.out  = nn.Linear(in_features=self.init_width * 4,out_features=10)
+
+        self.dropout = nn.Dropout(self.dropout_rate)
+        #self.fc5  = nn.Linear(in_features=)
+        #size (7,7,1)
+
+    def forward(self,z):
+        z = F.leaky_relu(self.conv1_1(z),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv1_bn(self.conv1_2(z)),negative_slope=self.negative_slope)
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.leaky_relu(self.conv2_1(z),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv2_bn(self.conv2_2(z)),negative_slope=self.negative_slope)
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.leaky_relu(self.conv3_1(z),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv3_bn(self.conv3_2(z)),negative_slope=self.negative_slope)
+
+        z = F.max_pool2d(z,kernel_size=2,padding=1)
+        z = F.leaky_relu(self.conv4_1(z),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv4_bn(self.conv4_2(z)),negative_slope=self.negative_slope)
+        #
+
+        # z = F.relu(self.conv4_1(z))
+        # z = F.relu(self.conv4_2(z))
+        #
+        z = torch.flatten(z,1)
+        z = F.leaky_relu(self.fc1_bn(self.fc1(z)),negative_slope=self.negative_slope)
+        z = self.dropout(z)
+        z = F.leaky_relu(self.fc2_bn(self.fc2(z)),negative_slope=self.negative_slope)
+        #z = self.dropout(z)
+        z = self.out(z)
+        return z
+
+
+
+
+
+class mnist_model_pool_kern5(nn.Module):
+    def __init__(self,init_width=4,dropout_rate=0.4):
+        super(mnist_model_pool_kern5,self).__init__()
+
+        self.init_width   = init_width
+        self.dropout_rate = dropout_rate
+
+        self.init_layers()
+
+
+    def init_layers(self):
+        #input size (28,28)
+        self.conv1_1 = nn.Conv2d(in_channels=1,out_channels=self.init_width,kernel_size=5,stride=1,padding=2)
+        #num weights= 3*4*1=12
+        self.conv1_2 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width,kernel_size=5,stride=1,
+                                 padding=2)
+        self.conv1_bn = nn.BatchNorm2d(num_features=self.init_width)
+        #num weights= 3*4*4=48, num biases = 4
+        #size (14,14,4)
+
+        #self.batch1 = nn.BatchNorm2d(num_features=self.init_width)
+        #input size is halved (14,14)
+        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=5,stride=1,
+                                 padding=2)
+        #num weights= 3*4*8=96 num biases = 8
+        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=5,stride=1,
+                                 padding=2)
+        self.conv2_bn = nn.BatchNorm2d(num_features=self.init_width*2)
+        #num weights= 3*8*8=192 num biases = 8
+        #size (14,14,8)
+        #input size is halved (7,7)
+        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=5,stride=1,
+                                 padding=2)
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv3_2 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width * 4,kernel_size=5,
+                                 stride=1,
+                                 padding=2)
+        self.conv3_bn = nn.BatchNorm2d(num_features=self.init_width*4)
+
+
+        self.conv4_1 = nn.Conv2d(in_channels=self.init_width*4,out_channels=self.init_width*8,kernel_size=5,stride=1,
+                                 padding=2)
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 8,kernel_size=5,
+                                 stride=1,
+                                 padding=2)
+        self.conv4_bn = nn.BatchNorm2d(num_features=self.init_width*8)
+        #size (7,7,16)
+        #input size is halved (4,4)
+        # self.conv4_1 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width*8 ,kernel_size=3,
+        #                          stride=2,
+        #                          padding=1)
+        # self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_cha=self.init_width * 4,kernel_size=3,
+        #                          stride=1,
+        #                          padding=1)
+        #size (4,4,16)
+        self.fc1  = nn.Linear(in_features=self.init_width * 4 * 4*8,out_features=self.init_width*4*4)
+        self.fc1_bn = nn.BatchNorm1d(num_features=self.init_width*4*4)
+        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4 )
+        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 )
+        self.out  = nn.Linear(in_features=self.init_width * 4,out_features=10)
+
+        self.dropout = nn.Dropout(self.dropout_rate)
+        #self.fc5  = nn.Linear(in_features=)
+        #size (7,7,1)
+
+    def forward(self,z):
+        z = F.relu(self.conv1_1(z))
+        z = F.relu(self.conv1_bn(self.conv1_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv2_1(z))
+        z = F.relu(self.conv2_bn(self.conv2_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv3_1(z))
+        z = F.relu(self.conv3_bn(self.conv3_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2,padding=1)
+        z = F.relu(self.conv4_1(z))
+        z = F.relu(self.conv4_bn(self.conv4_2(z)))
+        #
+
+        # z = F.relu(self.conv4_1(z))
+        # z = F.relu(self.conv4_2(z))
+        #
+        z = torch.flatten(z,1)
+        z = F.relu(self.fc1_bn(self.fc1(z)))
+        z = self.dropout(z)
+        z = F.relu(self.fc2_bn(self.fc2(z)))
+        #z = self.dropout(z)
+        z = self.out(z)
+        return z
+
+class mnist_model_pool_inddim3(nn.Module):
+    def __init__(self,init_width=4,dropout_rate=0.4):
+        super(mnist_model_pool_inddim3,self).__init__()
+
+        self.init_width   = init_width
+        self.dropout_rate = dropout_rate
+
+        self.init_layers()
+
+
+    def init_layers(self):
+        #input size (28,28)
+        self.conv1_1 = nn.Conv2d(in_channels=1,out_channels=self.init_width,kernel_size=(3,1),stride=(1,1),
+                                 padding=(1,0))
+        #num weights= 3*4*1=12
+        self.conv1_2 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width,kernel_size=(1,3),
+                                 stride=(1,1),
+                                 padding=(0,1))
+        self.conv1_bn = nn.BatchNorm2d(num_features=self.init_width)
+        #num weights= 3*4*4=48, num biases = 4
+        #size (14,14,4)
+
+        #self.batch1 = nn.BatchNorm2d(num_features=self.init_width)
+        #input size is halved (14,14)
+        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=(3,1),
+                                 stride=(1,1),
+                                 padding=(1,0))
+        #num weights= 3*4*8=96 num biases = 8
+        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=(1,3),
+                                 stride=(1,1),
+                                 padding=(0,1))
+        self.conv2_bn = nn.BatchNorm2d(num_features=self.init_width*2)
+        #num weights= 3*8*8=192 num biases = 8
+        #size (14,14,8)
+        #input size is halved (7,7)
+        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=(3,1),
+                                 stride=(1,1),
+                                 padding=(1,0))
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv3_2 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width * 4,kernel_size=(1,3),
+                                 stride=(1,1),
+                                 padding=(0,1))
+        self.conv3_bn = nn.BatchNorm2d(num_features=self.init_width*4)
+
+
+        self.conv4_1 = nn.Conv2d(in_channels=self.init_width*4,out_channels=self.init_width*8,kernel_size=(3,1),
+                                 stride=(1,1),
+                                 padding=(1,0))
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 8,kernel_size=(3,1),
+                                 stride=(1,1),
+                                 padding=(1,0))
+        self.conv4_bn = nn.BatchNorm2d(num_features=self.init_width*8)
+        #size (7,7,16)
+
+        #size (4,4,16)
+        self.fc1  = nn.Linear(in_features=self.init_width * 4 * 4*8,out_features=self.init_width*4*4)
+        self.fc1_bn = nn.BatchNorm1d(num_features=self.init_width*4*4)
+        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4 )
+        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 )
+        self.out  = nn.Linear(in_features=self.init_width * 4,out_features=10)
+
+        self.dropout = nn.Dropout(self.dropout_rate)
+        #self.fc5  = nn.Linear(in_features=)
+        #size (7,7,1)
+
+    def forward(self,z):
+        z = F.relu(self.conv1_1(z))
+        z = F.relu(self.conv1_bn(self.conv1_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv2_1(z))
+        z = F.relu(self.conv2_bn(self.conv2_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv3_1(z))
+        z = F.relu(self.conv3_bn(self.conv3_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2,padding=1)
+        z = F.relu(self.conv4_1(z))
+        z = F.relu(self.conv4_bn(self.conv4_2(z)))
+        #
+
+        # z = F.relu(self.conv4_1(z))
+        # z = F.relu(self.conv4_2(z))
+        #
+        z = torch.flatten(z,1)
+        z = F.relu(self.fc1_bn(self.fc1(z)))
+        z = self.dropout(z)
+        z = F.relu(self.fc2_bn(self.fc2(z)))
+        #z = self.dropout(z)
+        z = self.out(z)
+        return z
+
+
+
+class mnist_model_pool_inddim5(nn.Module):
+    def __init__(self,init_width=4,dropout_rate=0.4):
+        super(mnist_model_pool_inddim5,self).__init__()
+
+        self.init_width   = init_width
+        self.dropout_rate = dropout_rate
+
+        self.init_layers()
+
+
+    def init_layers(self):
+        #input size (28,28)
+        self.conv1_1 = nn.Conv2d(in_channels=1,out_channels=self.init_width,kernel_size=(5,1),stride=(1,1),
+                                 padding=(2,0))
+        #num weights= 3*4*1=12
+        self.conv1_2 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width,kernel_size=(1,5),
+                                 stride=(1,1),
+                                 padding=(0,2))
+        self.conv1_bn = nn.BatchNorm2d(num_features=self.init_width)
+        #num weights= 3*4*4=48, num biases = 4
+        #size (14,14,4)
+
+        #self.batch1 = nn.BatchNorm2d(num_features=self.init_width)
+        #input size is halved (14,14)
+        self.conv2_1 = nn.Conv2d(in_channels=self.init_width,out_channels=self.init_width*2,kernel_size=(5,1),stride=(1,1),
+                                 padding=(2,0))
+        #num weights= 3*4*8=96 num biases = 8
+        self.conv2_2 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*2,kernel_size=(1,5),
+                                 stride=(1,1),
+                                 padding=(0,2))
+        self.conv2_bn = nn.BatchNorm2d(num_features=self.init_width*2)
+        #num weights= 3*8*8=192 num biases = 8
+        #size (14,14,8)
+        #input size is halved (7,7)
+        self.conv3_1 = nn.Conv2d(in_channels=self.init_width*2,out_channels=self.init_width*4,kernel_size=(5,1),stride=(1,1),
+                                 padding=(2,0))
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv3_2 = nn.Conv2d(in_channels=self.init_width * 4,out_channels=self.init_width * 4,kernel_size=(1,5),
+                                 stride=(1,1),
+                                 padding=(0,2))
+        self.conv3_bn = nn.BatchNorm2d(num_features=self.init_width*4)
+
+
+        self.conv4_1 = nn.Conv2d(in_channels=self.init_width*4,out_channels=self.init_width*8,kernel_size=(5,1),stride=(1,1),
+                                 padding=(2,0))
+        #num weights= 3*8*16=384 num biases = 16
+        self.conv4_2 = nn.Conv2d(in_channels=self.init_width * 8,out_channels=self.init_width * 8,kernel_size=(1,5),
+                                 stride=(1,1),
+                                 padding=(0,2))
+        self.conv4_bn = nn.BatchNorm2d(num_features=self.init_width*8)
+        #size (7,7,16)
+        #input size is halved (4,4)
+        #size (4,4,16)
+        self.fc1  = nn.Linear(in_features=self.init_width * 4 * 4*8,out_features=self.init_width*4*4)
+        self.fc1_bn = nn.BatchNorm1d(num_features=self.init_width*4*4)
+        self.fc2  = nn.Linear(in_features=self.init_width * 4 * 4 ,out_features=self.init_width * 4 )
+        self.fc2_bn = nn.BatchNorm1d(num_features=self.init_width * 4 )
+        self.out  = nn.Linear(in_features=self.init_width * 4,out_features=10)
+
+        self.dropout = nn.Dropout(self.dropout_rate)
+        #self.fc5  = nn.Linear(in_features=)
+        #size (7,7,1)
+
+    def forward(self,z):
+        z = F.relu(self.conv1_1(z))
+        z = F.relu(self.conv1_bn(self.conv1_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv2_1(z))
+        z = F.relu(self.conv2_bn(self.conv2_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2)
+        z = F.relu(self.conv3_1(z))
+        z = F.relu(self.conv3_bn(self.conv3_2(z)))
+
+        z = F.max_pool2d(z,kernel_size=2,padding=1)
+        z = F.relu(self.conv4_1(z))
+        z = F.relu(self.conv4_bn(self.conv4_2(z)))
+        #
+
+        # z = F.relu(self.conv4_1(z))
+        # z = F.relu(self.conv4_2(z))
+        #
+        z = torch.flatten(z,1)
+        z = F.relu(self.fc1_bn(self.fc1(z)))
+        z = self.dropout(z)
+        z = F.relu(self.fc2_bn(self.fc2(z)))
+        #z = self.dropout(z)
+        z = self.out(z)
+        return z
+
+
+
+
 class mnist_model_pool_single_conv(nn.Module):
     def __init__(self,init_width=4,dropout_rate=0.4):
         super(mnist_model_pool_single_conv,self).__init__()
@@ -472,6 +958,9 @@ def _test_model():
 
         else:
             break
+    del my_cnn
+    torch.cuda.empty_cache()
+
     my_cnn = mnist_model(init_width=16,dropout_rate=0.4).to(device)
     for i,data in enumerate(train_loader,0):
         if i == 0:
@@ -484,7 +973,8 @@ def _test_model():
 
         else:
             break
-
+    del my_cnn
+    torch.cuda.empty_cache()
     my_cnn = mnist_model_pool_single_conv(init_width=8,dropout_rate=0.4).to(device)
     for i,data in enumerate(train_loader,0):
         if i == 0:
@@ -497,7 +987,77 @@ def _test_model():
 
         else:
             break
+    del my_cnn
+    torch.cuda.empty_cache()
+    my_cnn = mnist_model_pool_leaky(init_width=8,dropout_rate=0.4).to(device)
+    for i,data in enumerate(train_loader,0):
+        if i == 0:
+            inputs,labels = data[0].to(device,dtype=torch.float),data[1].to(device)
 
+            out = my_cnn(inputs)
+            print(out.shape)
+            assert out.shape == (batch_size,10)
+
+
+        else:
+            break
+    del my_cnn
+    torch.cuda.empty_cache()
+    my_cnn = mnist_model_pool_kern5(init_width=8,dropout_rate=0.4).to(device)
+    for i,data in enumerate(train_loader,0):
+        if i == 0:
+            inputs,labels = data[0].to(device,dtype=torch.float),data[1].to(device)
+
+            out = my_cnn(inputs)
+            print(out.shape)
+            assert out.shape == (batch_size,10)
+
+
+        else:
+            break
+    del my_cnn
+    torch.cuda.empty_cache()
+    my_cnn = mnist_model_pool3fc(init_width=8,dropout_rate=0.4).to(device)
+
+    for i,data in enumerate(train_loader,0):
+        if i == 0:
+            inputs,labels = data[0].to(device,dtype=torch.float),data[1].to(device)
+
+            out = my_cnn(inputs)
+            print(out.shape)
+            assert out.shape == (batch_size,10)
+
+
+        else:
+            break
+    del my_cnn
+    torch.cuda.empty_cache()
+    my_cnn = mnist_model_pool_inddim5(init_width=8,dropout_rate=0.4).to(device)
+    for i,data in enumerate(train_loader,0):
+        if i == 0:
+            inputs,labels = data[0].to(device,dtype=torch.float),data[1].to(device)
+
+            out = my_cnn(inputs)
+            print(out.shape)
+            assert out.shape == (batch_size,10)
+
+
+        else:
+            break
+    del my_cnn
+    torch.cuda.empty_cache()
+    my_cnn = mnist_model_pool_inddim3(init_width=8,dropout_rate=0.4).to(device)
+    for i,data in enumerate(train_loader,0):
+        if i == 0:
+            inputs,labels = data[0].to(device,dtype=torch.float),data[1].to(device)
+
+            out = my_cnn(inputs)
+            print(out.shape)
+            assert out.shape == (batch_size,10)
+
+
+        else:
+            break
 
 if __name__=='__main__':
     _test_model()
