@@ -1,3 +1,9 @@
+
+"""
+.. module:: Architectures
+   :platform: Unix, Windows
+   :synopsis: A useful module indeed.
+"""
 import torch.cuda
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
