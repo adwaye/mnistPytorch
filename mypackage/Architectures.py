@@ -868,11 +868,19 @@ class mnist_model_pool_single_conv(nn.Module):
 
 
 class mnist_model_pool_bn_leaky(nn.Module):
-    def __init__(self,init_width=4,dropout_rate=0.4):
+    def __init__(self,init_width=4,dropout_rate=0.4,negative_slope=0.1):
+        """
+        conv2d-->bn-->
+
+        :param init_width:
+        :param dropout_rate:
+        :param negative_slope:
+        """
         super(mnist_model_pool_bn_leaky,self).__init__()
 
-        self.init_width = init_width
-        self.dropout_rate = dropout_rate
+        self.init_width     = init_width
+        self.dropout_rate   = dropout_rate
+        self.negative_slope = negative_slope
 
         self.init_layers()
 
@@ -943,20 +951,20 @@ class mnist_model_pool_bn_leaky(nn.Module):
         #size (7,7,1)
 
     def forward(self,z):
-        z = F.leaky_relu(self.conv11_bn(self.conv1_1(z)),negative_slope=0.1)
-        z = F.leaky_relu(self.conv12_bn(self.conv1_2(z)),negative_slope=0.1)
+        z = F.leaky_relu(self.conv11_bn(self.conv1_1(z)),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv12_bn(self.conv1_2(z)),negative_slope=self.negative_slope)
 
         z = F.max_pool2d(z,kernel_size=2)
-        z = F.leaky_relu(self.conv21_bn(self.conv2_1(z)),negative_slope=0.1)
-        z = F.leaky_relu(self.conv22_bn(self.conv2_2(z)),negative_slope=0.1)
+        z = F.leaky_relu(self.conv21_bn(self.conv2_1(z)),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv22_bn(self.conv2_2(z)),negative_slope=self.negative_slope)
 
         z = F.max_pool2d(z,kernel_size=2)
-        z = F.leaky_relu(self.conv31_bn(self.conv3_1(z)),negative_slope=0.1)
-        z = F.leaky_relu(self.conv32_bn(self.conv3_2(z)),negative_slope=0.1)
+        z = F.leaky_relu(self.conv31_bn(self.conv3_1(z)),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv32_bn(self.conv3_2(z)),negative_slope=self.negative_slope)
 
         z = F.max_pool2d(z,kernel_size=2,padding=1)
-        z = F.leaky_relu(self.conv41_bn(self.conv4_1(z)),negative_slope=0.1)
-        z = F.leaky_relu(self.conv42_bn(self.conv4_2(z)),negative_slope=0.1)
+        z = F.leaky_relu(self.conv41_bn(self.conv4_1(z)),negative_slope=self.negative_slope)
+        z = F.leaky_relu(self.conv42_bn(self.conv4_2(z)),negative_slope=self.negative_slope)
         #
 
         # z = F.relu(self.conv4_1(z))
