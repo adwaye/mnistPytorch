@@ -27,9 +27,10 @@ Clone the repository from https://github.com/adwaye/mnistPytorch
 
 .. code-block::
 
-    pip install -r requirements.txt
+
     git clone https://github.com/adwaye/mnistPytorch [path_to_cloned_repo]
-    cd mnisPytorch
+    cd mnistPytorch
+    pip install -r requirements.txt
     python setup.py install
 
 ============================
