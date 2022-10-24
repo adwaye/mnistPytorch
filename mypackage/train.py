@@ -240,7 +240,7 @@ class Trainer(object):
         global_step = 0
         self._create_log_files()
         for epoch in range(epochs):
-            print(f"======epoch={epochs}")
+            print(f"======epoch={epoch}")
             global_step = self._train_block(global_step=global_step)
             self._eval_block(global_step=global_step)
             if self.write_logs:
