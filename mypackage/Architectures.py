@@ -10,20 +10,22 @@ import matplotlib.pyplot as plt
 
 class simple_model(Module):
     """
-
-    :param init_width:initial width of filters for first conv layer
-    :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
-
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width)->relu->conv2d(kern=3,stride=2,out=init_width)->relu->
+    conv2d(kern=3,stride=1,out=init_width*2)->relu->conv2d(kern=3,stride=2,out=init_width*2)->relu->
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=2,out=init_width*4)->relu->
+    fc(out=init_with*4*4)->relu->fc(out=init_with*4)->relu->fc(out=10)
     """
 
 
     def __init__(self,init_width=4,dropout_rate=0.4):
         """
-
-        :param init_width:initial width of filters for first conv layer
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
         :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
-
+        :type dropout_rate: float
         """
+
         super(simple_model,self).__init__()
 
         self.init_width   = init_width
@@ -100,7 +102,23 @@ class simple_model(Module):
 
 
 class mnist_model(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width*2)->relu->conv2d(kern=3,stride=2,out=init_width)->batch_norm->relu->
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=2,out=init_width*2))->batch_norm->relu->
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=2,out=init_width*4))->batch_norm->relu->
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=2,out=init_width*8))->batch_norm->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4*2)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
+
     def __init__(self,init_width=16,dropout_rate=0.4):
+        """
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
+
         super(mnist_model,self).__init__()
 
         self.init_width   = init_width
@@ -188,7 +206,21 @@ class mnist_model(nn.Module):
 
 
 class mnist_model_pool(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width*2)->relu->conv2d(kern=3,stride=1,out=init_width)->batch_norm->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=1,out=init_width*2))->batch_norm->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=1,out=init_width*4))->batch_norm->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=1,out=init_width*8))->batch_norm->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool,self).__init__()
 
         self.init_width   = init_width
@@ -284,7 +316,22 @@ class mnist_model_pool(nn.Module):
 
 
 class mnist_model_pool3fc(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width*2)->relu->conv2d(kern=3,stride=1,out=init_width)->batch_norm->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=1,out=init_width*2))->batch_norm->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=1,out=init_width*4))->batch_norm->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->conv2d(kern=3,stride=1,out=init_width*8))->batch_norm->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4*2)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
+
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool3fc,self).__init__()
 
         self.init_width   = init_width
@@ -386,7 +433,22 @@ class mnist_model_pool3fc(nn.Module):
         return z
 
 class mnist_model_pool_leaky(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width*2)->leaky_relu->conv2d(kern=3,stride=1,out=init_width)->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->leaky_relu->conv2d(kern=3,stride=1,out=init_width*2))->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->leaky_relu->conv2d(kern=3,stride=1,out=init_width*4))->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->leaky_relu->conv2d(kern=3,stride=1,out=init_width*8))->batch_norm->leaky_relu->
+    fc(out=init_with*4*4)->bnorm->leaky_relu->fc(out=init_with*4)->bnorm->leaky_relu->fc(out=10)
+    """
+
     def __init__(self,init_width=4,dropout_rate=0.4,negative_slope=0.1):
+        """
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool_leaky,self).__init__()
 
         self.init_width   = init_width
@@ -485,7 +547,22 @@ class mnist_model_pool_leaky(nn.Module):
 
 
 class mnist_model_pool_kern5(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=5,stride=1,out=init_width*2)->relu->conv2d(kern=5,stride=1,out=init_width)->batch_norm->relu->max_pool2d
+    conv2d(kern=5,stride=1,out=init_width*4)->relu->conv2d(kern=5,stride=1,out=init_width*2))->batch_norm->relu->max_pool2d
+    conv2d(kern=5,stride=1,out=init_width*4)->relu->conv2d(kern=5,stride=1,out=init_width*4))->batch_norm->relu->max_pool2d
+    conv2d(kern=5,stride=1,out=init_width*4)->relu->conv2d(kern=5,stride=1,out=init_width*8))->batch_norm->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool_kern5,self).__init__()
 
         self.init_width   = init_width
@@ -579,7 +656,22 @@ class mnist_model_pool_kern5(nn.Module):
         return z
 
 class mnist_model_pool_inddim3(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=(1,3),stride=1,out=init_width*2)->relu->conv2d(kern=(3,1),stride=1,out=init_width)->batch_norm->relu->max_pool2d
+    conv2d(kern=(1,3),stride=1,out=init_width*4)->relu->conv2d(kern=(3,1),stride=1,out=init_width*2))->batch_norm->relu->max_pool2d
+    conv2d(kern=(1,3),stride=1,out=init_width*4)->relu->conv2d(kern=(3,1),stride=1,out=init_width*4))->batch_norm->relu->max_pool2d
+    conv2d(kern=(1,3),stride=1,out=init_width*4)->relu->conv2d(kern=(3,1),stride=1,out=init_width*8))->batch_norm->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool_inddim3,self).__init__()
 
         self.init_width   = init_width
@@ -675,7 +767,22 @@ class mnist_model_pool_inddim3(nn.Module):
 
 
 class mnist_model_pool_inddim5(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=(1,5),stride=1,out=init_width*2)->relu->conv2d(kern=(5,1),stride=1,out=init_width)->batch_norm->relu->max_pool2d
+    conv2d(kern=(1,5),stride=1,out=init_width*4)->relu->conv2d(kern=(5,1),stride=1,out=init_width*2))->batch_norm->relu->max_pool2d
+    conv2d(kern=(1,5),stride=1,out=init_width*4)->relu->conv2d(kern=(5,1),stride=1,out=init_width*4))->batch_norm->relu->max_pool2d
+    conv2d(kern=(1,5),stride=1,out=init_width*4)->relu->conv2d(kern=(5,1),stride=1,out=init_width*8))->batch_norm->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool_inddim5,self).__init__()
 
         self.init_width   = init_width
@@ -769,7 +876,23 @@ class mnist_model_pool_inddim5(nn.Module):
 
 
 class mnist_model_pool_single_conv(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width*2)->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
+
     def __init__(self,init_width=4,dropout_rate=0.4):
+        """
+
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
+        """
         super(mnist_model_pool_single_conv,self).__init__()
 
         self.init_width   = init_width
@@ -864,14 +987,23 @@ class mnist_model_pool_single_conv(nn.Module):
 
 
 class mnist_model_pool_bn_leaky(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=init_width*2)->batch_norm->leaky_relu->conv2d(kern=3,stride=1,out=init_width)->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->batch_norm->leaky_relu->conv2d(kern=3,stride=1,out=init_width*2))->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->batch_norm->leaky_relu->conv2d(kern=3,stride=1,out=init_width*4))->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=init_width*4)->batch_norm->leaky_relu->conv2d(kern=3,stride=1,out=init_width*8))->batch_norm->leaky_relu->
+    fc(out=init_with*4*4)->bnorm->relu->fc(out=init_with*4)->bnorm->relu->fc(out=10)
+    """
     def __init__(self,init_width=4,dropout_rate=0.4,negative_slope=0.1):
         """
-        conv2d-->bn-->
 
-        :param init_width:
-        :param dropout_rate:
-        :param negative_slope:
+        :param init_width: initial width of filters for first conv layer
+        :type init_width: int
+        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+        :type dropout_rate: float
         """
+
         super(mnist_model_pool_bn_leaky,self).__init__()
 
         self.init_width     = init_width
@@ -977,17 +1109,16 @@ class mnist_model_pool_bn_leaky(nn.Module):
 
 
 class Network(nn.Module):
+    """
+    model with the following architecture
+    conv2d(kern=3,stride=1,out=32)->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=64)->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=128)->batch_norm->leaky_relu->max_pool2d
+    conv2d(kern=3,stride=1,out=256)->batch_norm->leaky_relu->max_pool2d
+    fc(out=10244)->bnorm->relu->fc(out=512)->bnorm->relu->fc(out=256)->bnorm->relu->fc(out=64)->bnorm->relu->fc(out=10)
+    """
     def __init__(self):
         super(Network,self).__init__()
-        # Image starts as a matrix of size (1, 28, 28)
-
-        # The size of the image after each convolution or pooling layer can be obtained by:
-        # output = ((input - kernel_size + (2 * padding)) / stride) + 1
-
-        # Convolutions and batch normalisations
-        # Batch norm reduces internal covariate shift
-        # Normalises the input feature (subtract batch mean, divide by batch sd)
-        # This speeds up neural network training times
         self.conv1 = nn.Conv2d(in_channels=1,out_channels=32,kernel_size=5,stride=1,padding=2)  # conv1
         self.conv1_bn = nn.BatchNorm2d(num_features=32)
         self.conv2 = nn.Conv2d(in_channels=32,out_channels=64,kernel_size=5,stride=1,padding=2)  # conv2
