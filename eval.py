@@ -38,6 +38,7 @@ for i,data in enumerate(submission_loader):
     preds = model(data[0].to(device,dtype=torch.float))
 
     predictions = torch.cat((predictions, preds.argmax(dim=1)), dim=0)
+print(predictions.shape)
 submission_file = SAMPLE_SUBMISSION.copy()
 submission_file['label'] = predictions.cpu().numpy()
 submission_file.to_csv("submission.csv", index=False)
