@@ -8,15 +8,21 @@ from Augmentor.Operations import Distort
 
 
 class RandomDistortion:
+    """Applies elastic distortion with prob probability see https://augmentor.readthedocs.io/en/stable/ for info on
+    grdi and magnitiude params
+
+    :param probability: 0-1 probability of operation being applied to image
+    :type probability: float
+    :param grid_width:
+    :type grid_width: int
+    :param grid_height:
+    :type grid_height: int
+    :param magnitude:
+    :type magnitude: float
+    """
     def __init__(self,probability, grid_width, grid_height, magnitude):
-        """
-        Applies elastic distortion with prob probability see https://augmentor.readthedocs.io/en/stable/ for info on
-        grdi and magnitiude params
-        :param probability:
-        :param grid_width:
-        :param grid_height:
-        :param magnitude:
-        """
+
+
         self.probability = probability
         self.grid_width  = grid_width
         self.grid_height = grid_height
@@ -40,12 +46,16 @@ class RandomDistortion:
                                                                    self.magnitude)
 
 class SaltPepperNoise:
+    """Applies Gaussian noise to an image
+
+    :param mean: mean of gaussian noise
+    :type mean: float
+    :param std: standard deviation of gaussian noise
+    :type std: float
+    """
     def __init__(self, mean=0,std=1):
-        """
-        Applies Gaussian noise to an image
-        :param mean:
-        :param std:
-        """
+
+
         self.mean = mean
         self.std  = std
 
@@ -57,8 +67,8 @@ class SaltPepperNoise:
         return self.__class__.__name__+'(mean={:},std={:})'.format(self.mean,self.std)
 
 class MapToInterval:
-    """
-    transforms image intensity to [0,1] interval
+    """transforms image intensity to [0,1] interval
+
     """
     def __init__(self):
         self.min=0
@@ -87,12 +97,14 @@ class MapToInterval:
 
 def create_train_test_transform(log_dir,write_params=True,kwargs={}):
     """
-    Creates transforms for training set and validation set. Validation trans has no augmentation, just toPIL and
-    ToTensor
+
     :param log_dir: string path to where log files need to be saved logfile contain info on params used for each
                     transformation
+    :type log_dir: string
     :param write_params: whether to save logs about parameters
-    :param kwargs: optional kwargs conataining params for each transform. see body
+    :type write_params: bool
+    :param kwargs: optional kwargs conataining params for each transform
+                    list of keys that will be used:
                     probability       = kwargs.get("probability",1)
                     max_rotation_left = kwargs.get("max_rotation_left",10.0)
                     max_rotation_right = kwargs.get("max_rotation_right",10.0)
@@ -110,8 +122,36 @@ def create_train_test_transform(log_dir,write_params=True,kwargs={}):
                     blur_min = kwargs.get("blur_min",0.1)
                     blur_kernel = kwargs.get("blur_kernel",5)
                     noise_sd    = kwargs.get("noise_sd",1/784)
-    :return: tuple tran_trans, test_trans
+    :type kwargs: dict
+    :return: trains_trans and test_trans: transformations to be used on trainining data and validation data respectively
+    :rtype: tuple
+
+
+    .. code-block::
+
+       opt_kwargs = dict(
+              probability=trans_probability, #probability of applying data augmentation to \n
+              max_rotation_right=max_rotation_right, #max rotation for affine transform in data aug \n
+              max_rotation_left=max_rotation_left, #min rotation for affine transform in data aug \n
+              max_factor=max_factor, #max scale for affine transform in data aug \n
+              min_factor=min_factor, #min scale for affine transform in data aug \n
+              grid_height=grid_height, #grid height for elastic transform \n
+              grid_width=grid_width, #grid width for elastic transform \n
+              magnitude=magnitude, #magnitude of elastic transform \n
+              init_width=init_width, #number of stacks in first conv layer of nn \n
+              brightness=brightness, #brightness of color jitter transform \n
+              contrast = contrast, #contrast in color jitter transform see https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html \n
+              translate=translate, #fraction by which to translate in affine transform see https://pytorch.org/vision/main/generated/torchvision.transforms.RandomAffine.html \n
+              blur_kernel = blur_kernel,  #paramters of gaussian blur see https://pytorch.org/vision/main/generated/torchvision.transforms.GaussianBlur.html \n
+              blur_min = blur_min, \n
+              blur_max = blur_max, \n
+              noise_sd = noise_sd #sd of gaussian noise transform see custom_transform.SaltPepperNoise \n
+              )
+       train_trans, test_trans = create_train_test_transform(kwargs=opt_kwarsgs)
+
+
     """
+
 
     probability       = kwargs.get("probability",1)
     max_rotation_left = kwargs.get("max_rotation_left",10.0)
@@ -188,7 +228,7 @@ def create_train_test_transform(log_dir,write_params=True,kwargs={}):
     return trans_train,trans_test
 
 
-def test():
+def _test():
     try:
         from mypackage.DataManipulation import MnistDataset,DataLoader
     except ModuleNotFoundError:
@@ -231,35 +271,7 @@ def test():
 
 
 if __name__=='__main__':
-    test()
+    _test()
 
 
 
-
-    # kwargs={}
-    # probability       = kwargs.get("probability",1)
-    # max_rotation_left = kwargs.get("max_rotation_left",10.0)
-    # max_rotation_right = kwargs.get("max_rotation_right",10.0)
-    #
-    # max_factor = kwargs.get("max_factor",1.1)
-    # min_factor = kwargs.get("min_factor",1.05)
-    #
-    # grid_height = kwargs.get("grid_height",15)
-    # grid_width = kwargs.get("grid_width",15)
-    # magnitude  = kwargs.get("magnitude",1)
-    # brightness = kwargs.get("brightness",2)
-    # contrast = kwargs.get("contrast",2)
-    #
-    #
-    # p = Augmentor.Pipeline('/media/adwaye/2tb/data/xray_data/joints')
-    # p.rotate(probability=1,max_left_rotation=max_rotation_left,max_right_rotation=max_rotation_right)
-    # p.zoom(probability=1,min_factor=min_factor,max_factor=max_factor)
-    # p.random_distortion(grid_width=grid_width,grid_height=grid_height,magnitude=magnitude,probability=1)
-    #
-    #
-    # sample = p.sample(10)
-    # data_gen = MnistDataset(csvfile,im_size=out_shape[1:])
-    # data_gen
-    #
-    #
-    #

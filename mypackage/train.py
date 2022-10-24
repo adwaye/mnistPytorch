@@ -26,67 +26,77 @@ except ModuleNotFoundError:
 
 
 class Trainer(object):
+    """
+
+    :param model: model of class nn.Module, please use classes present in mypackage.Architectures as
+                  the model
+    :param optimizer: choice of 'adam' or 'momentum'
+    :param device: 'cuda' or 'cpu': device on which to run training and inference
+    :param transform: list of transform needs to be output of torchvision.transforms.Compose and needs to have
+                    the form
+                                               transforms = trns.Compose([trns.ToPILImage(),
+                                                  transform1,
+                                                  transform2,
+                                                  .
+                                                  .
+                                                  .,
+                                                  transformN,
+                                                  trns.ToTensor()
+                                ])
+
+                       )
+    :param train_file: pd.dataframe (result of load_csv) or path to csb containing training data, needs to be same
+                        format as mnist dataset
+    :param val_file: redundant
+    :param log_dir:  string where to save the tensorboard output and the model, and params info
+    :param create_save_loc: bool whether to create new directory withing log_dir or to save withing log_dir when saving
+    :param write_logs: bool whether to save logs
+    :param kwargs: dict, extra arguments to be passed
+    example:
+
+
+
+
+    .. code-block::
+
+       from mypackage.Architectures import simple_model
+       from mypackage.train import Trainer
+       my_model = simple_model()
+       TEST_FILE = "./data/test.csv"
+       TRAIN_FILE = "./data/train.csv"
+       log_loc   = "./logs"
+       opt_kwargs = dict(batch_size=batch_size,#data batch size \n
+              l_rate=l_rate, #initial learning rate \n
+              lr_gamma=lr_gamma, #decay rate for lr scheduler \n
+              momentum=momentum, #momentum for sgd, if sgd is selected \n
+              weight_decay=weight_decay, #weight decay parameter for optimizer \n
+              dampening=dampening, #dampening for adam and sgd \n
+              nesterov=nesterov, #whether to use nesterov in sgd \n
+              probability=trans_probability, #probability of applying data augmentation to \n
+              max_rotation_right=max_rotation_right, #max rotation for affine transform in data aug \n
+              max_rotation_left=max_rotation_left, #min rotation for affine transform in data aug \n
+              max_factor=max_factor, #max scale for affine transform in data aug \n
+              min_factor=min_factor, #min scale for affine transform in data aug \n
+              grid_height=grid_height, #grid height for elastic transform \n
+              grid_width=grid_width, #grid width for elastic transform \n
+              magnitude=magnitude, #magnitude of elastic transform \n
+              init_width=init_width, #number of stacks in first conv layer of nn \n
+              brightness=brightness, #brightness of color jitter transform \n
+              contrast = contrast, #contrast in color jitter transform see https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html \n
+              translate=translate, #fraction by which to translate in affine transform see https://pytorch.org/vision/main/generated/torchvision.transforms.RandomAffine.html \n
+              blur_kernel = blur_kernel,  #paramters of gaussian blur see https://pytorch.org/vision/main/generated/torchvision.transforms.GaussianBlur.html \n
+              blur_min = blur_min, \n
+              blur_max = blur_max, \n
+              noise_sd = noise_sd #sd of gaussian noise transform see custom_transform.SaltPepperNoise \n
+              )
+       my_trainer = Trainer(model,kwargs=opt_kwargs,log_dir=log_loc,create_save_loc=True,transform=True,
+                     train_file=TRAIN_FILE,val_file=TEST_FILE,write_logs=True)
+
+    """
     def __init__(self,model,optimizer='Adam',device='cuda',transform=False,train_file =
     "Data/train.csv",val_file = "Data/Dig-MNIST.csv",log_dir='./logs',create_save_loc=True,write_logs=True,kwargs={}):
-        """
-
-        :param model: model of class nn.Module, please use classes present in mypackage.Architectures as
-                      the model
-        :param optimizer: choice of 'adam' or 'momentum'
-        :param device: 'cuda' or 'cpu': device on which to run training and inference
-        :param transform: list of transform needs to be output of torchvision.transforms.Compose and needs to have
-                        the form
-                                                   transforms = trns.Compose([trns.ToPILImage(),
-                                                      transform1,
-                                                      transform2,
-                                                      .
-                                                      .
-                                                      .,
-                                                      transformN,
-                                                      trns.ToTensor()
-                                    ])
-
-                           )
-        :param train_file: pd.dataframe (result of load_csv) or path to csb containing training data, needs to be same
-                            format as mnist
-        dataset
-        :param val_file: redundant
-        :param log_dir:  string where to save the tensorboard output and the model, and params info
-        :param create_save_loc: bool whther to create new directory withing log_dir or to save withing log_dir when
-                            saving
-        :param write_logs: bool whether to save logs
-        :param kwargs: dict, extra arguments to be passed. for a list of arguments
-        example:
-        opt_kwargs = dict(batch_size=batch_size,#data batch size \n
-                  l_rate=l_rate, #initial learning rate \n
-                  lr_gamma=lr_gamma, #decay rate for lr scheduler \n
-                  momentum=momentum, #momentum for sgd, if sgd is selected \n
-                  weight_decay=weight_decay, #weight decay parameter for optimizer \n
-                  dampening=dampening, #dampening for adam and sgd \n
-                  nesterov=nesterov, #whether to use nesterov in sgd \n
-                  probability=trans_probability, #probability of applying data augmentation to \n
-                  max_rotation_right=max_rotation_right, #max rotation for affine transform in data aug \n
-                  max_rotation_left=max_rotation_left, #min rotation for affine transform in data aug \n
-                  max_factor=max_factor, #max scale for affine transform in data aug \n
-                  min_factor=min_factor, #min scale for affine transform in data aug \n
-                  grid_height=grid_height, #grid height for elastic transform \n
-                  grid_width=grid_width, #grid width for elastic transform \n
-                  magnitude=magnitude, #magnitude of elastic transform \n
-                  init_width=init_width, #number of stacks in first conv layer of nn \n
-                  brightness=brightness, #brightness of color jitter transform \n
-                  contrast = contrast, #contrast in color jitter transform see
-                  https://pytorch.org/vision/main/generated/torchvision.transforms.ColorJitter.html \n
-                  translate=translate, #fraction by which to translate in affine transform see
-                  https://pytorch.org/vision/main/generated/torchvision.transforms.RandomAffine.html \n
-                  blur_kernel = blur_kernel,  #paramters of gaussian blur see :
-                  https://pytorch.org/vision/main/generated/torchvision.transforms.GaussianBlur.html \n
-                  blur_min = blur_min, \n
-                  blur_max = blur_max, \n
-                  noise_sd = noise_sd #sd of gaussian noise transform see custom_transform.SaltPepperNoise \n
-                  )
 
 
-        """
         self.write_logs = write_logs
         self.model = model
         self.kwargs = kwargs
@@ -216,6 +226,15 @@ class Trainer(object):
                      out_dir=self.model_outdir)
 
     def train(self,epochs=2,resume_training=False):
+        """trains the model
+
+        :param epochs: number of epochs
+        :type epochs: int
+        :param resume_training: currently not being used
+        :type resume_training: bool
+        :return:
+        :rtype:
+        """
 
 
         global_step = 0
@@ -245,9 +264,30 @@ class Trainer(object):
 
 def train_block(device,model,optimizer,scheduler,data_loader,writer,global_step,loss_fn=nn.CrossEntropyLoss(),
                 write_logs=True):
-    #training_loss     = 0.0
-    #training_accuracy = 0.0
-    #running_loss = 0.0
+    """Perform forward backward passes for one epoch, can be used to train torch.nn.module type models
+
+    :param device:
+    :type device: torch.device
+    :param model:
+    :type model: torch.nn.module
+    :param optimizer: optimizer to be used
+    :type optimizer: torch.optim.optimizer
+    :param scheduler: learning rate scheduler
+    :type scheduler: torch.optim
+    :param data_loader: dataloader to be used to generate training data batches
+    :type data_loader: torch.utils.data.DataLoader
+    :param writer: logging writer to be used
+    :type writer: torch.utils.data.SummaryWriter
+    :param global_step: current step of training algorithm
+    :type global_step: int
+    :param loss_fn:
+    :type loss_fn: torch.nn.losses see https://pytorch.org/docs/stable/nn.html#loss-functions
+    :param write_logs: default True, if False, writer does not write any log files
+    :type write_logs: bool
+    :return: global_step, number of forward-backward passes is added to input global_step
+    :rtype: int
+    """
+
 
     model.train()
     scheduler.step()
@@ -281,28 +321,26 @@ def train_block(device,model,optimizer,scheduler,data_loader,writer,global_step,
 
 
 def eval_block(device,model,data_loader,writer,global_step,loss_fn=nn.CrossEntropyLoss(),write_logs=True):
-    """
+    """Performs inference on the given dataset
 
     :param device:
-    :type device:
+    :type device: torch.device
     :param model:
-    :type model:
-    :param data_loader:
-    :type data_loader:
-    :param writer:
-    :type writer:
-    :param global_step:
-    :type global_step:
+    :type model: torch.nn.module
+    :param data_loader: dataloader to be used to generate training data batches
+    :type data_loader: torch.utils.data.DataLoader
+    :param writer: logging writer to be used to store accuracy and losses on data_loader
+    :type writer: torch.utils.data.SummaryWriter
+    :param global_step: current step of training algorithm
+    :type global_step: int
     :param loss_fn:
-    :type loss_fn:
-    :param write_logs:
-    :type write_logs:
-    :return:
-    :rtype:
+    :type loss_fn: torch.nn.losses see https://pytorch.org/docs/stable/nn.html#loss-functions
+    :param write_logs: default True, if False, writer does not write any log files
+    :type write_logs: bool
+    :return: global_step, number of forward-backward passes is added to input global_step
+    :rtype: int
     """
-    #training_loss     = 0.0
-    #training_accuracy = 0.0
-    #running_loss = 0.0
+
 
     eval_loss     = 0.0
     eval_accuracy = 0.0
@@ -337,6 +375,19 @@ def eval_block(device,model,data_loader,writer,global_step,loss_fn=nn.CrossEntro
 
 
 def make_prediction_fig(inputs,pred_class,labels,iter):
+    """plots images given in inputs with their corresponding predicted class and true class
+
+    :param inputs: input datat to the model that produces outputs
+    :type inputs: pytorch.Tensor
+    :param outputs: outputs produced by modelbeing logged, should have shape [batch_size,1]
+    :type outputs: pytorch.Tensor
+    :param labels: true labels  should have shape [batch_size,1]
+    :type labels: pytorch.Tensor
+    :param iter: step at which logs are being logged in training loop
+    :type iter: int
+    :return:
+    :rtype:
+    """
 
     fig = plt.figure(figsize=(12, 16))
     for idx in np.arange(16):
@@ -354,16 +405,17 @@ def make_prediction_fig(inputs,pred_class,labels,iter):
 
 
 def make_confusion_matrix(inputs,pred_class,labels,iter):
-    """
+    """makes a confusion matrix from the predicted_classes produced by some model being evaluated on inputs and true
+    labels
 
-    :param inputs:
-    :type inputs:
-    :param pred_class:
-    :type pred_class:
-    :param labels:
-    :type labels:
-    :param iter:
-    :type iter:
+    :param inputs: input datat to the model that produces outputs
+    :type inputs: pytorch.Tensor
+    :param outputs: outputs produced by modelbeing logged, should have shape [batch_size,1]
+    :type outputs: pytorch.Tensor
+    :param labels: true labels  should have shape [batch_size,1]
+    :type labels: pytorch.Tensor
+    :param iter: step at which logs are being logged in training loop
+    :type iter: int
     :return:
     :rtype:
     """
@@ -387,21 +439,24 @@ def add_to_writer(writer,loss_fn,inputs,outputs,labels,iter,write_logs):
 
 
     :param writer:
-    :type writer:
-    :param loss_fn:
-    :type loss_fn:
-    :param inputs:
-    :type inputs:
-    :param outputs:
-    :type outputs:
-    :param labels:
-    :type labels:
-    :param iter:
-    :type iter:
-    :param write_logs:
-    :type write_logs:
+    :type writer: torch.utils.data.SummaryWriter
+    :param loss_fn: loss function used to evaluate model loss
+    :type loss_fn: torch.nn.losses see https://pytorch.org/docs/stable/nn.html#loss-functions
+    :param inputs: input datat to the model that produces outputs
+    :type inputs: pytorch.Tensor
+    :param outputs: outputs produced by modelbeing logged, should have shape [batch_size,1]
+    :type outputs: pytorch.Tensor
+    :param labels: true labels  should have shape [batch_size,1]
+    :type labels: pytorch.Tensor
+    :param iter: step at which logs are being logged in training loop
+    :type iter: int
+    :param write_logs: if True, writer saves logging info
+    :type write_logs: bool
     :return:
     :rtype:
+
+
+
     """
 
     pred_score,pred_class = outputs.max(dim=1)
@@ -420,23 +475,22 @@ def add_to_writer(writer,loss_fn,inputs,outputs,labels,iter,write_logs):
     # writer.add_figure('Confusion matrix',fig,global_step=iter)
 
 
-def save_checkpt(model,optimizer,scheduler,epoch,out_dir,max_keep=10,delete_prev=True):
-    """
+def save_checkpt(model,optimizer,scheduler,epoch,out_dir,max_keep=10):
+    """saves the state of the model, optimizer and scheduler in a training loop to output_loc
+    where output_loc=out_dir/model.__get_name()/checkpoint_epoch_[epoch].pt
 
     :param model:
-    :type model:
-    :param optimizer:
-    :type optimizer:
-    :param scheduler:
-    :type scheduler:
+    :type model: torch.nn.module
+    :param optimizer: optimizer to be used
+    :type optimizer: torch.optim.optimizer
+    :param scheduler: learning rate scheduler
+    :type scheduler: torch.optim
     :param epoch:
-    :type epoch:
-    :param out_dir:
-    :type out_dir:
-    :param max_keep:
-    :type max_keep:
-    :param delete_prev:
-    :type delete_prev:
+    :type epoch: int
+    :param out_dir: location where model should be saved
+    :type out_dir: string
+    :param max_keep: how many checkpoints to keep>1
+    :type max_keep: int
     :return:
     :rtype:
     """
@@ -455,20 +509,21 @@ def save_checkpt(model,optimizer,scheduler,epoch,out_dir,max_keep=10,delete_prev
 
 
 def load_checkpt(model,optimizer,scheduler,epoch,out_dir):
-    """
+    """loads the state of the model, optimizer and scheduler saved at outdir
+    will try to access the checkpoint at out_dir/model.__get_name()/checkpoint_epoch_[epoch].pt
 
     :param model:
-    :type model:
-    :param optimizer:
-    :type optimizer:
-    :param scheduler:
-    :type scheduler:
+    :type model: torch.nn.module
+    :param optimizer: optimizer to be used
+    :type optimizer: torch.optim.optimizer
+    :param scheduler: learning rate scheduler
+    :type scheduler: torch.optim
     :param epoch:
-    :type epoch:
-    :param out_dir:
-    :type out_dir:
-    :return:
-    :rtype:
+    :type epoch: int
+    :param out_dir: location where model should be saved
+    :type out_dir: string
+    :return: model,optimizer,scheduler: model, optimizer and scheduler whose states have been loaded
+    :rtype: tuple
     """
     file_path = os.path.join(out_dir,'checkpoint_epoch_{:}.pt'.format(epoch))
     print('loading '+file_path)
@@ -483,6 +538,11 @@ def load_checkpt(model,optimizer,scheduler,epoch,out_dir):
 
 
 def _test_trainer():
+    """unittest for trainer
+
+    :return:
+    :rtype:
+    """
 
 
     model = simple_model()
@@ -613,6 +673,11 @@ def _test_trainer():
 
 
 def test_confusion_matrix():
+    """test function for confusion matrix
+    
+    :return: 
+    :rtype: 
+    """
     y_true = np.random.randint(low=0,high=10,size=50,dtype=int)
 
     y_pred = np.random.randint(low=0,high=9,size=50,dtype=int)

@@ -1,32 +1,28 @@
-
-"""
-.. module:: Architectures
-   :platform: Unix, Windows
-   :synopsis: A useful module indeed.
-"""
 import torch.cuda
 from torch.utils.data import DataLoader, Dataset
 import numpy as np
 import csv
 import torch.nn as nn
+from torch.nn import Module
 import torch.nn.functional as F
-
+import torch
 import matplotlib.pyplot as plt
 
-class simple_model(nn.Module):
+class simple_model(Module):
     """
-        :param init_width:initial width of filters for first conv layer
-        :type init_width :int
-        :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
-        :type dropout_rate: float
+
+    :param init_width:initial width of filters for first conv layer
+    :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
+
     """
+
+
     def __init__(self,init_width=4,dropout_rate=0.4):
         """
 
         :param init_width:initial width of filters for first conv layer
-        :type init_width :int
         :param dropout_rate: dropout rate to be used in fc layers between 0 and 1
-        :type dropout_rate: float
+
         """
         super(simple_model,self).__init__()
 
@@ -1049,10 +1045,25 @@ class Network(nn.Module):
 
 def count_nn_params(model):
     """
-    counts the number of trainable weights+biases in the nn
-    :param model:
-    :return:
+    counts the number of trainable weights and biases in the neural network given by model
+
+    :param model: CNN whose weights and biases are to be counted
+    :type model:  torch.nn.Module
+    :return:      number of neural network weights and parameters
+    :rtype:       int
+
+   :caption: Using the function
+
+
+
+    .. code-block::
+
+       from Architectures import simple_model
+       my_model = simple_model()
+       n_params = count_nn_params(my_model)
+
     """
+
     num_params = 0
     for param in list(model.parameters()):
         n = 1
@@ -1063,6 +1074,7 @@ def count_nn_params(model):
 
 
 def _test_model():
+
     try:
         from mypackage.DataManipulation import MnistDataset,load_train_csv
     except ModuleNotFoundError:

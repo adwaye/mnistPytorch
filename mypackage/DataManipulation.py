@@ -1,4 +1,5 @@
 from torch.utils.data import DataLoader, Dataset
+import torch
 import numpy as np
 
 import pkg_resources
@@ -24,29 +25,38 @@ label_dict = {'0' : 'shunya',
 
 
 
-class MnistDataset(Dataset):
+class MnistDataset(torch.utils.data.Dataset):
+    """returns a dataset object that returns a tuple im, lab from the mnist format csv
+
+    :param csvfile: pandas dataframe or location pointing to csv file, csv must be in the mnist
+                    format where col[0] contains the labels and col[1:] contain flattened pixel intensities
+    :type csvfile: str or pandas.dataframe
+    :param im_size: tuple (width, height) of the image contained in col[1:]
+    :type im_size: tuple of ints
+    :param transforms: transformations to be applied to the image before being fed into the nn,
+                       last transformation needs to be torchvision.transforms.ToTensor() to work with architectures
+    :type transforms: torchvision.transforms
+
+
+    :caption: Using the function
+
+
+
+    .. code-block::
+
+       from mypackage.DataManipulation import *
+       import torchvision.transforms as trns
+       trans_train = trns.Compose([
+                                trns.ToPILImage(),
+                                trns.RandomAffine(translate=(0.1,0.1),scale=(0.9,1.1),degrees=(9,9)),
+                                trans.ToTensor()
+                                ])
+       data_set = MnistDataset(file_path,im_size=(28,28),transforms=trans_train)
+       train_loader = DataLoader(data_set,batch_size=100,shuffle=True)
+    """
+
 
     def __init__(self,csvfile,im_size,transforms=None):
-        """
-        retursn a dataset object that returns a tuple im, lab from the mnist format csv
-        :param csvfile: pandas dataframe or location pointing to csv file, csv must be in the mnist
-                        format where col[0] contains the labels and col[1:] contain flattened pixel intensities
-        :param im_size: tuple (width, height) of the image contained in col[1:]
-        :param transforms: transformations to be applied to the image before being fed into the nn,
-                           last transformation needs to be torchvision.transforms.ToTensor() to work with architectures
-                           example, valid tranform looks like this
-                           transforms = trns.Compose([trns.ToPILImage(),
-                                                      transform1,
-                                                      transform2,
-                                                      .
-                                                      .
-                                                      .,
-                                                      transformN,
-                                                      trns.ToTensor()
-                                    ])
-
-                           )
-        """
         super(MnistDataset,self).__init__()
         if type(csvfile) is str:
             self.dataframe = pd.read_csv(csvfile)
@@ -82,9 +92,10 @@ class MnistDataset(Dataset):
 
 
 def load_train_csv():
-    """
-    loads the train_csv file from kannadaMnist
-    :return: pd.dataframe
+    """loads the sample submission file to be filled in at inference time
+
+    :return: dataframe containing the training data see https://www.kaggle.com/competitions/Kannada-MNIST/data
+    :rtype: pd.dataframe
     """
 
     # data = get_data('<kannadamnistpackage','Data/train.csv')
@@ -99,33 +110,42 @@ def load_train_csv():
     return pd.read_csv(stream,encoding='latin-1')
 
 def load_test_csv():
-    """
-    loads the test_csv file from kannadaMnist to be used for submission
-    :return: pd.dataframe
+    """loads the sample submission file to be filled in at inference time
+
+    :return: dataframe containing the test data see https://www.kaggle.com/competitions/Kannada-MNIST/data
+    :rtype: pd.dataframe
     """
     stream = pkg_resources.resource_filename(__name__,'Data/test.csv')
     return pd.read_csv(stream,encoding='latin-1')
 
 def load_dig_csv():
-    """
-    loads the dig-mnist file to eb used for further validation
-    :return: pd.datarframe
+    """loads the sample submission file to be filled in at inference time
+
+    :return: dataframe containgin the Dig-MNIST data see https://www.kaggle.com/competitions/Kannada-MNIST/data
+    :rtype: pd.dataframe
     """
     stream = pkg_resources.resource_filename(__name__,'Data/Dig-MNIST.csv')
     return pd.read_csv(stream,encoding='latin-1')
 
 def load_sample_submission():
+    """loads the sample submission file to be filled in at inference time
+
+    :return: empty pandas dataframe to store predicted values
+    :rtype: pd.dataframe
     """
-    loads the sample submission file to be filled in at inference time
-    :return: pd.dataframe
-    """
+
     stream = pkg_resources.resource_filename(__name__,'Data/sample_submission.csv')
     return pd.read_csv(stream,encoding='latin-1')
 
 
 
 
-def plot_digits():
+def _plot_digits():
+    """plots samples from the MNISTDataset class
+
+    :return: plot of a sample from mnist generated from the mnistdataset class
+    :rtype: matplotlib.figure
+    """
 
     #arr      =  load_csv(file_path)
 
@@ -154,12 +174,18 @@ def plot_digits():
             ax[i,j].set_yticks([])
     plt.tight_layout()
     plt.show()
+    return fig
 
 
 
 
 
-def test_data():
+def _test_data():
+    """Tests the shape of the output data from MnistDataset
+
+    :return: None
+    :rtype:  None
+    """
     csvfile   = load_test_csv()
     out_shape = (1,28,28)
     data_gen  = MnistDataset(csvfile,im_size=out_shape[1:])
@@ -171,8 +197,8 @@ def test_data():
 
 
 if __name__=='__main__':
-    plot_digits()
-    test_data()
+    _plot_digits()
+    _test_data()
     # import torch
     # csvfile   = "Kannada-MNIST/train.csv"
     # out_shape = (1,28,28)

@@ -12,57 +12,8 @@ Welcome to mypackage's documentation!
 
 
 
-############
-Logging utils
-############
-.. automodule:: util
-   :members:
-
-############
-Training classes
-############
-
-.. automodule:: train
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :private-members: # if you want to document __x attributes
-    :special-members:
-
-############
-Data loader
-############
-
-.. automodule:: DataManipulation
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :private-members: # if you want to document __x attributes
-    :special-members:
 
 
-############
-Models
-############
-
-.. automodule:: Architectures
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :private-members: # if you want to document __x attributes
-    :special-members:
-
-
-############
-data Augmentation
-############
-
-.. automodule:: custom_transforms
-    :members:
-    :undoc-members:
-    :show-inheritance:
-    :private-members: # if you want to document __x attributes
-    :special-members:
 
 Indices and tables
 ==================

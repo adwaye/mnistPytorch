@@ -3,6 +3,7 @@ import os
 
 def make_train_test_log_dir(model,log_loc='./logs',create_dirs=True):
     """Creates a train, test output directory where model parameters are saved
+
     :param model:  model whose logs need to be saved, directory will have name model.__get_name()
     :type model: pytorch.nn.module
     :param log_loc: path pointing where new directory should be created
@@ -12,6 +13,15 @@ def make_train_test_log_dir(model,log_loc='./logs',create_dirs=True):
     :return: tuple containing train_loc,test_loc,oudir, train_loc = outdir/train ttest_loc=outdir/test outdir: path
              pointing to log_loc/model.__get_name()
     :rtype: tuple()
+
+
+
+    >>> from mypackage.Architectures import simple_model
+    >>> model = simple_model()
+    >>> x = make_train_test_log_dir(model)
+    >>> print(x)
+    ['./logs/simple_model/1/train','./logs/simple_model/1/test','./logs/simple_model/1']
+
     """
     out_dir   = make_log_dir(model,log_loc,create_dirs=create_dirs)
     train_loc = os.path.join(out_dir,'train')
@@ -24,19 +34,26 @@ def make_train_test_log_dir(model,log_loc='./logs',create_dirs=True):
 
 
 def make_log_dir(model,log_loc = './logs',create_dirs=True):
-    """
-        Uses the model name and creates a numbered folder withing model name
-        example
-    from Architectures import simple_model
-    model = simple_model()
-    x = make_lod_dir(model)
-    print(x)
+    """makes an expriment directory for a pytorch model
+
+    :param model:  model whose logs need to be saved, directory will have name model.__get_name()
+    :type model: pytorch.nn.module
+    :param log_loc: path pointing where new directory should be created
+    :type log_loc: string
+    :param create_dirs: if true, log dirs are created
+    :type create_dirs: bool
+    :return: location of newly created folder
+    :rtype: string
+
+
+    >>> from mypackage.Architectures import simple_model
+    >>> model = simple_model()
+    >>> x = make_log_dir(model)
+    >>> print(x)
     './logs/simple_model/1'
-    :param model:
-    :param log_loc:
-    :param create_dirs: bool whether to create directorues
-    :return:
+
     """
+
 
     log_directory = os.path.join(log_loc,model._get_name())
     if create_dirs:
@@ -45,19 +62,31 @@ def make_log_dir(model,log_loc = './logs',create_dirs=True):
 
 
 def update_dir(nameInit,create_dirs=True):
-    """
-    Functions that creates numbered folders within directory nameInit. If a folder with name x where x is a number
+    """Functions that creates numbered folders within directory nameInit. If a folder with name x where x is a number
     exists, the function creates through i until x+i is no more a folder name. Then creates the folder with name
     nameInit/[x+i]
+
     :param nameInit: path within which the numbered folder needs to be located
-    :return: path of the newly created folder
-    example \n
-    nameInit = ./ \n
-    ls ./ returns folder1 1 2 3 \n
-    x = update_dir('./) \n
-    print(x)
-    ./4
+    :type nameInit: str
+    :param create_dirs:  whether to create the directories if they are not present, default to True
+    :type create_dirs: bool
+    :return: newly created directory
+    :rtype: None
+
+
+
+    >>> import os
+    >>> nameInit = ./
+    >>> os.listdir(nameInit)
+    1 2
+    >>> x = update_dir(nameInit)
+    >>> os.listdir(nameInit)
+    1/ 2/ 3/
+    >>> x
+    3
+
     """
+
     output_directory = nameInit
     if not os.path.exists(output_directory):
         output_directory = os.path.join(output_directory,'1')
