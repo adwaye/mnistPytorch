@@ -42,16 +42,27 @@ Data loader
 
 
 ############
-Data loader
+Models
 ############
 
-.. automodule:: DataManipulation
+.. automodule:: Architectures
     :members:
     :undoc-members:
     :show-inheritance:
     :private-members: # if you want to document __x attributes
     :special-members:
 
+
+############
+data Augmentation
+############
+
+.. automodule:: custom_transforms
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    :private-members: # if you want to document __x attributes
+    :special-members:
 
 Indices and tables
 ==================
