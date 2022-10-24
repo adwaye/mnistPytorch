@@ -169,7 +169,7 @@ def _plot_digits():
             im,lab = data_gen.__getitem__(i=sampled_index)
 
             ax[i,j].imshow(im[0],cmap='Greys_r')
-            ax[i,j].set_title('label = {:} {:}'.format(lab,label_dict[str(lab)]))
+            ax[i,j].set_title(f'label = {lab} {label_dict[str(lab)]}')
             ax[i,j].set_xticks([])
             ax[i,j].set_yticks([])
     plt.tight_layout()

@@ -19,7 +19,8 @@ release = '0.0.1'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.viewcode',
-    'sphinx.ext.napoleon'
+    'sphinx.ext.napoleon',
+    'sphinx.ext.autosectionlabel'
 ]
 
 autodoc_typehints = 'signature'
@@ -35,7 +36,7 @@ language = 'python'
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 # import sphinx_readable_theme
-html_theme = 'renku'
+html_theme = 'python_docs_theme'
 # html_theme_path = [sphinx_readable_theme.get_html_theme_path()]
 # html_theme_options = {
 #     "stickysidebar": "true",

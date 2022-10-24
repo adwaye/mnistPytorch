@@ -240,7 +240,7 @@ class Trainer(object):
         global_step = 0
         self._create_log_files()
         for epoch in range(epochs):
-            print("======epoch={:}".format(epoch))
+            print(f"======epoch={epochs}")
             global_step = self._train_block(global_step=global_step)
             self._eval_block(global_step=global_step)
             if self.write_logs:
@@ -393,7 +393,7 @@ def make_prediction_fig(inputs,pred_class,labels,iter):
     for idx in np.arange(16):
         ax = fig.add_subplot(4, 4, idx+1, xticks=[], yticks=[])
         ax.imshow(inputs[idx,0,:,:].cpu(),cmap='Greys_r')
-        ax.set_title("Predicted Class {:},\n true label={:}".format(pred_class[idx].cpu(),labels[idx].cpu()))
+        ax.set_title(f"Predicted Class {pred_class[idx].cpu()},\n true label={labels[idx].cpu()}")
     plt.tight_layout()
         # ax.set_title("{0}, {1:.1f}%\n(label: {2})".format(
 
@@ -430,7 +430,7 @@ def make_confusion_matrix(inputs,pred_class,labels,iter):
     # Plot the dataframe using seaborn
     fig = plt.figure(figsize=(12,7))
     sns.heatmap(df_cm,annot=True)
-    plt.title("Neural Network Confusion Matrix step{:}".format(iter),fontsize=20)
+    plt.title(f"Neural Network Confusion Matrix step{iter}",fontsize=20)
     return fig
 
 def add_to_writer(writer,loss_fn,inputs,outputs,labels,iter,write_logs):
@@ -499,7 +499,7 @@ def save_checkpt(model,optimizer,scheduler,epoch,out_dir,max_keep=10):
         for f in checkpoints:
             os.remove(os.path.join(out_dir,f))
 
-    file_path = os.path.join(out_dir,'checkpoint_epoch_{:}.pt'.format(epoch))
+    file_path = os.path.join(out_dir,f'checkpoint_epoch_{epoch}.pt')
     torch.save({'epoch'     : epoch,
                 'net'       : model.state_dict(),
                 'optimizer' : optimizer.state_dict(),
@@ -525,7 +525,7 @@ def load_checkpt(model,optimizer,scheduler,epoch,out_dir):
     :return: model,optimizer,scheduler: model, optimizer and scheduler whose states have been loaded
     :rtype: tuple
     """
-    file_path = os.path.join(out_dir,'checkpoint_epoch_{:}.pt'.format(epoch))
+    file_path = os.path.join(out_dir,f'checkpoint_epoch_{epoch}.pt')
     print('loading '+file_path)
     checkpoint = torch.load(file_path)
     model.load_state_dict(checkpoint['net'])
@@ -688,7 +688,7 @@ def test_confusion_matrix():
     # Plot the dataframe using seaborn
     fig = plt.figure(figsize=(12,7))
     sns.heatmap(df_cm,annot=True)
-    plt.title("Neural Network Confusion Matrix step{:}".format(iter),fontsize=20)
+    plt.title(f"Neural Network Confusion Matrix step{iter}",fontsize=20)
 
 
 

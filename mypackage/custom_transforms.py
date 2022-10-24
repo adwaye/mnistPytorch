@@ -39,11 +39,10 @@ class RandomDistortion:
         return out[0]
 
     def __repr__(self):
-        return self.__class__.__name__+'(probability={:},grid_width={:},grid_height={:},magnitude={:})'.format(
-            self.probability,
-                                                                                        self.grid_width,
-                                                                       self.grid_height,
-                                                                   self.magnitude)
+        return self.__class__.__name__+f'(probability={self.probability},grid_width={self.grid_width},grid_height=' \
+                                       f'{self.grid_height},' \
+                                       f'magnitude={self.magnitude})'
+
 
 class SaltPepperNoise:
     """Applies Gaussian noise to an image
@@ -64,7 +63,7 @@ class SaltPepperNoise:
         return x + np.random.randn(*x.size) * self.std + self.mean
 
     def __repr__(self):
-        return self.__class__.__name__+'(mean={:},std={:})'.format(self.mean,self.std)
+        return self.__class__.__name__+f'(mean={self.mean},std={self.std})'
 
 class MapToInterval:
     """transforms image intensity to [0,1] interval
@@ -87,7 +86,7 @@ class MapToInterval:
         return outmap
 
     def __repr__(self):
-        return self.__class__.__name__+'(min={:},max={:})'.format(self.min,self.max)
+        return self.__class__.__name__+f'(min={self.min},max={self.max})'
 
 
 

@@ -10,6 +10,10 @@ Welcome to mypackage's documentation!
    :maxdepth: 3
    :caption: Contents:
 
+===========
+Getting started
+===========
+.. include:: ../../README.rst
 
 
 
@@ -21,3 +25,7 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+
+
+
